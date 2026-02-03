@@ -1,12 +1,18 @@
 # Acknowledgment
 This code is heavily based on Andrej Karpathy's [nanochat](https://github.com/karpathy/nanochat).
 
+## Acknowledgements (Written by Karpathy)
+
+- The name (nanochat) derives from my earlier project [nanoGPT](https://github.com/karpathy/nanoGPT), which only covered pretraining.
+- nanochat is also inspired by [modded-nanoGPT](https://github.com/KellerJordan/modded-nanogpt), which gamified the nanoGPT repo with clear metrics and a leaderboard, and borrows a lot of its ideas and some implementation for pretraining.
+- Thank you to [HuggingFace](https://huggingface.co/) for fineweb and smoltalk.
+- Thank you [Lambda](https://lambda.ai/service/gpu-cloud) for the compute used in developing this project.
+- Thank you to chief LLM whisperer 🧙‍♂️ Alec Radford for advice/guidance.
+- Thank you to the repo czar Sofie [@svlandeg](https://github.com/svlandeg) for help with managing issues, pull requests and discussions of nanochat.
+
+
 
 # nanochat
-
-![nanochat logo](dev/nanochat.png)
-
-> The best ChatGPT that $100 can buy.
 
 This repo is a full-stack implementation of an LLM like ChatGPT in a single, clean, minimal, hackable, dependency-lite codebase. nanochat is designed to run on a single 8XH100 node via scripts like [speedrun.sh](runs/speedrun.sh), that run the entire pipeline start to end. This includes tokenization, pretraining, finetuning, evaluation, inference, and web serving over a simple UI so that you can talk to your own LLM just like ChatGPT. nanochat will become the capstone project of the course LLM101n being developed by Eureka Labs.
 
@@ -193,28 +199,8 @@ nanochat is nowhere near finished. The goal is to improve the state of the art i
 
 Current LLM policy: disclosure. When submitting a PR, please declare any parts that had substantial LLM contribution and that you have not written or that you do not fully understand.
 
-## Acknowledgements
 
-- The name (nanochat) derives from my earlier project [nanoGPT](https://github.com/karpathy/nanoGPT), which only covered pretraining.
-- nanochat is also inspired by [modded-nanoGPT](https://github.com/KellerJordan/modded-nanogpt), which gamified the nanoGPT repo with clear metrics and a leaderboard, and borrows a lot of its ideas and some implementation for pretraining.
-- Thank you to [HuggingFace](https://huggingface.co/) for fineweb and smoltalk.
-- Thank you [Lambda](https://lambda.ai/service/gpu-cloud) for the compute used in developing this project.
-- Thank you to chief LLM whisperer 🧙‍♂️ Alec Radford for advice/guidance.
-- Thank you to the repo czar Sofie [@svlandeg](https://github.com/svlandeg) for help with managing issues, pull requests and discussions of nanochat.
 
-## Cite
-
-If you find nanochat helpful in your research cite simply as:
-
-```bibtex
-@misc{nanochat,
-  author = {Andrej Karpathy},
-  title = {nanochat: The best ChatGPT that $100 can buy},
-  year = {2025},
-  publisher = {GitHub},
-  url = {https://github.com/karpathy/nanochat}
-}
-```
 
 ## License
 
@@ -222,7 +208,11 @@ MIT
 
 
 
-
+```bash
+# git info
+git config user.name "boris-dotv"
+git config user.email "1322553126@qq.com"
+```
 
 
 
