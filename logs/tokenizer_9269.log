@@ -1,0 +1,6 @@
+max_chars: 10,000,000,000
+doc_cap: 10,000
+vocab_size: 32,768
+Training time: 330.76s
+Saved tokenizer encoding to /public_hw/share/cit_ztyu/cz/nanochat/tokenizer/tokenizer.pkl
+Saved token_bytes to /public_hw/share/cit_ztyu/cz/nanochat/tokenizer/token_bytes.pt

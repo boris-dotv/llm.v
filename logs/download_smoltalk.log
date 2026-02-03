@@ -1,0 +1,11 @@
+Removing incomplete file 'base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.1ef325f1b111266a6b26e0196871bd78baa8c2f3.incomplete' (hf_transfer=True)
+Downloading '.gitattributes' to 'base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.1ef325f1b111266a6b26e0196871bd78baa8c2f3.incomplete'
+Download complete. Moving file to base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/.gitattributes
+Downloading 'data/test-00000-of-00001.parquet' to 'base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/.cache/huggingface/download/data/iln7FAK8ScOKT0OL8tHV8680tg8=.be6773dcce145f3918ff14237b1f765affa427b0b13f6a02d397e665ac908b9a.incomplete'
+Download complete. Moving file to base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/data/test-00000-of-00001.parquet
+Downloading 'data/train-00003-of-00004.parquet' to 'base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/.cache/huggingface/download/data/BKVE7yNDGqCFpEKQmj3EIVICaIg=.c15edfca888c9924a626dad7b7f4e9f08d8f406f997ac13be46bc9be0a6192db.incomplete'
+Download complete. Moving file to base_data/hf_datasets/HuggingFaceTB___smol-smoltalk/data/train-00003-of-00004.parquet
+[33m⚠️  Warning: 'huggingface-cli download' is deprecated. Use 'hf download' instead.[0m
+/public_hw/share/cit_ztyu/cz/nanochat/base_data/hf_datasets/HuggingFaceTB___smol-smoltalk
+
+

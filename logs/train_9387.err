@@ -1,0 +1,551 @@
+W0126 09:12:35.425000 3715933 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] 
+W0126 09:12:35.425000 3715933 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] *****************************************
+W0126 09:12:35.425000 3715933 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0126 09:12:35.425000 3715933 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] *****************************************
+2026-01-26 09:12:55,240 - nanochat.flash_attention - [32m[1mINFO[0m - Flash Attention enabled. Using compiled cuda kernels from flash_attn package.
+2026-01-26 09:12:55,244 - nanochat.flash_attention - [32m[1mINFO[0m - Flash Attention enabled. Using compiled cuda kernels from flash_attn package.
+2026-01-26 09:12:57,672 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 2
+wandb: Tracking run with wandb version 0.24.0
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /public_hw/share/cit_ztyu/cz/nanochat/wandb/offline-run-20260126_091258-ycyqy9l9
+2026-01-26 09:45:12,976 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_009500_rank1.pt
+2026-01-26 09:45:14,488 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_009500.pt
+2026-01-26 09:45:14,491 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_009500.json
+2026-01-26 09:45:18,144 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_009500_rank0.pt
+2026-01-26 10:18:52,891 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_010000_rank1.pt
+2026-01-26 10:18:55,374 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_010000.pt
+2026-01-26 10:18:55,376 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_010000.json
+2026-01-26 10:18:59,390 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_010000_rank0.pt
+2026-01-26 10:49:55,136 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_010500_rank1.pt
+2026-01-26 10:49:56,792 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_010500.pt
+2026-01-26 10:49:56,794 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_010500.json
+2026-01-26 10:50:00,422 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_010500_rank0.pt
+2026-01-26 11:21:24,044 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_011000_rank1.pt
+2026-01-26 11:21:25,555 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_011000.pt
+2026-01-26 11:21:25,557 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_011000.json
+2026-01-26 11:21:29,262 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_011000_rank0.pt
+2026-01-26 11:52:24,271 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_011500_rank1.pt
+2026-01-26 11:52:25,999 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_011500.pt
+2026-01-26 11:52:26,001 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_011500.json
+2026-01-26 11:52:29,673 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_011500_rank0.pt
+2026-01-26 12:25:58,303 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_012000_rank1.pt
+2026-01-26 12:26:00,706 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_012000.pt
+2026-01-26 12:26:00,709 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_012000.json
+2026-01-26 12:26:04,734 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_012000_rank0.pt
+2026-01-26 12:57:01,175 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_012500_rank1.pt
+2026-01-26 12:57:02,908 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_012500.pt
+2026-01-26 12:57:02,912 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_012500.json
+2026-01-26 12:57:06,768 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_012500_rank0.pt
+2026-01-26 13:28:31,911 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_013000_rank1.pt
+2026-01-26 13:28:33,495 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_013000.pt
+2026-01-26 13:28:33,505 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_013000.json
+2026-01-26 13:28:37,216 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_013000_rank0.pt
+2026-01-26 13:59:32,669 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_013500_rank1.pt
+2026-01-26 13:59:34,293 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_013500.pt
+2026-01-26 13:59:34,296 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_013500.json
+2026-01-26 13:59:38,040 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_013500_rank0.pt
+2026-01-26 14:33:08,594 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_014000_rank1.pt
+2026-01-26 14:33:10,437 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_014000.pt
+2026-01-26 14:33:10,439 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_014000.json
+2026-01-26 14:33:14,432 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_014000_rank0.pt
+2026-01-26 15:04:10,260 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_014500_rank1.pt
+2026-01-26 15:04:11,539 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_014500.pt
+2026-01-26 15:04:11,541 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_014500.json
+2026-01-26 15:04:15,247 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_014500_rank0.pt
+2026-01-26 15:35:41,972 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_015000_rank1.pt
+2026-01-26 15:35:43,289 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_015000.pt
+2026-01-26 15:35:43,292 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_015000.json
+2026-01-26 15:35:47,129 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_015000_rank0.pt
+2026-01-26 16:06:44,144 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_015500_rank1.pt
+2026-01-26 16:06:45,518 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_015500.pt
+2026-01-26 16:06:45,520 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_015500.json
+2026-01-26 16:06:49,024 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_015500_rank0.pt
+2026-01-26 16:40:14,642 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_016000_rank1.pt
+2026-01-26 16:40:19,096 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_016000.pt
+2026-01-26 16:40:19,099 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_016000.json
+2026-01-26 16:40:22,753 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_016000_rank0.pt
+2026-01-26 17:11:19,269 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_016500_rank1.pt
+2026-01-26 17:11:20,741 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_016500.pt
+2026-01-26 17:11:20,743 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_016500.json
+2026-01-26 17:11:24,294 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_016500_rank0.pt
+2026-01-26 17:42:49,299 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_017000_rank1.pt
+2026-01-26 17:42:50,838 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_017000.pt
+2026-01-26 17:42:50,843 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_017000.json
+2026-01-26 17:42:54,345 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_017000_rank0.pt
+2026-01-26 18:13:51,183 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_017500_rank1.pt
+2026-01-26 18:13:52,819 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_017500.pt
+2026-01-26 18:13:52,824 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_017500.json
+2026-01-26 18:13:56,608 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_017500_rank0.pt
+2026-01-26 18:47:22,368 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_018000_rank1.pt
+2026-01-26 18:47:24,643 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_018000.pt
+2026-01-26 18:47:24,661 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_018000.json
+2026-01-26 18:47:28,673 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_018000_rank0.pt
+2026-01-26 19:18:24,940 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_018500_rank1.pt
+2026-01-26 19:18:26,253 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_018500.pt
+2026-01-26 19:18:26,256 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_018500.json
+2026-01-26 19:18:29,827 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_018500_rank0.pt
+2026-01-26 19:49:53,997 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_019000_rank1.pt
+2026-01-26 19:49:55,909 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_019000.pt
+2026-01-26 19:49:55,912 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_019000.json
+2026-01-26 19:49:59,859 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_019000_rank0.pt
+2026-01-26 20:20:56,453 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_019500_rank1.pt
+2026-01-26 20:20:57,983 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_019500.pt
+2026-01-26 20:20:57,986 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_019500.json
+2026-01-26 20:21:01,584 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_019500_rank0.pt
+2026-01-26 20:54:27,542 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_020000_rank1.pt
+2026-01-26 20:54:30,145 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_020000.pt
+2026-01-26 20:54:30,147 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_020000.json
+2026-01-26 20:54:34,029 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_020000_rank0.pt
+2026-01-26 21:25:31,053 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_020500_rank1.pt
+2026-01-26 21:25:32,695 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_020500.pt
+2026-01-26 21:25:32,699 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_020500.json
+2026-01-26 21:25:36,343 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_020500_rank0.pt
+2026-01-26 21:57:04,018 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_021000_rank1.pt
+2026-01-26 21:57:05,668 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_021000.pt
+2026-01-26 21:57:05,670 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_021000.json
+2026-01-26 21:57:09,253 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_021000_rank0.pt
+2026-01-26 22:28:07,470 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_021500_rank1.pt
+2026-01-26 22:28:09,017 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_021500.pt
+2026-01-26 22:28:09,019 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_021500.json
+2026-01-26 22:28:12,636 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_021500_rank0.pt
+2026-01-26 23:01:39,746 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_022000_rank1.pt
+2026-01-26 23:01:42,039 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_022000.pt
+2026-01-26 23:01:42,042 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_022000.json
+2026-01-26 23:01:45,580 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_022000_rank0.pt
+2026-01-26 23:32:41,827 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_022500_rank1.pt
+2026-01-26 23:32:43,495 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_022500.pt
+2026-01-26 23:32:43,498 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_022500.json
+2026-01-26 23:32:47,040 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_022500_rank0.pt
+2026-01-27 00:04:12,142 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_023000_rank1.pt
+2026-01-27 00:04:13,550 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_023000.pt
+2026-01-27 00:04:13,552 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_023000.json
+2026-01-27 00:04:17,000 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_023000_rank0.pt
+2026-01-27 00:35:13,261 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_023500_rank1.pt
+2026-01-27 00:35:14,729 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_023500.pt
+2026-01-27 00:35:14,732 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_023500.json
+2026-01-27 00:35:18,347 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_023500_rank0.pt
+2026-01-27 01:08:44,664 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_024000_rank1.pt
+2026-01-27 01:08:47,240 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_024000.pt
+2026-01-27 01:08:47,242 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_024000.json
+2026-01-27 01:08:50,689 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_024000_rank0.pt
+2026-01-27 01:39:48,900 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_024500_rank1.pt
+2026-01-27 01:39:50,520 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_024500.pt
+2026-01-27 01:39:50,521 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_024500.json
+2026-01-27 01:39:53,979 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_024500_rank0.pt
+2026-01-27 02:11:19,305 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_025000_rank1.pt
+2026-01-27 02:11:20,824 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_025000.pt
+2026-01-27 02:11:20,826 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_025000.json
+2026-01-27 02:11:24,344 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_025000_rank0.pt
+2026-01-27 02:42:21,690 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_025500_rank1.pt
+2026-01-27 02:42:23,255 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_025500.pt
+2026-01-27 02:42:23,258 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_025500.json
+2026-01-27 02:42:27,026 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_025500_rank0.pt
+2026-01-27 03:15:54,734 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_026000_rank1.pt
+2026-01-27 03:15:57,214 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_026000.pt
+2026-01-27 03:15:57,217 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_026000.json
+2026-01-27 03:16:00,746 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_026000_rank0.pt
+2026-01-27 03:47:00,340 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_026500_rank1.pt
+2026-01-27 03:47:01,632 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_026500.pt
+2026-01-27 03:47:01,634 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_026500.json
+2026-01-27 03:47:05,237 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_026500_rank0.pt
+2026-01-27 04:18:33,080 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_027000_rank1.pt
+2026-01-27 04:18:34,461 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_027000.pt
+2026-01-27 04:18:34,463 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_027000.json
+2026-01-27 04:18:38,074 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_027000_rank0.pt
+2026-01-27 04:49:35,574 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_027500_rank1.pt
+2026-01-27 04:49:37,135 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_027500.pt
+2026-01-27 04:49:37,138 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_027500.json
+2026-01-27 04:49:40,560 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_027500_rank0.pt
+2026-01-27 05:23:07,108 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_028000_rank1.pt
+2026-01-27 05:23:09,556 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_028000.pt
+2026-01-27 05:23:09,559 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_028000.json
+2026-01-27 05:23:13,015 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_028000_rank0.pt
+2026-01-27 05:54:10,760 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_028500_rank1.pt
+2026-01-27 05:54:12,470 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_028500.pt
+2026-01-27 05:54:12,473 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_028500.json
+2026-01-27 05:54:16,047 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_028500_rank0.pt
+2026-01-27 06:25:41,441 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_029000_rank1.pt
+2026-01-27 06:25:43,014 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_029000.pt
+2026-01-27 06:25:43,017 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_029000.json
+2026-01-27 06:25:46,836 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_029000_rank0.pt
+2026-01-27 06:56:44,485 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_029500_rank1.pt
+2026-01-27 06:56:45,780 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_029500.pt
+2026-01-27 06:56:45,783 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_029500.json
+2026-01-27 06:56:49,314 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_029500_rank0.pt
+2026-01-27 07:30:17,728 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_030000_rank1.pt
+2026-01-27 07:30:20,103 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_030000.pt
+2026-01-27 07:30:20,106 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_030000.json
+2026-01-27 07:30:23,646 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_030000_rank0.pt
+2026-01-27 08:01:21,339 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_030500_rank1.pt
+2026-01-27 08:01:22,810 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_030500.pt
+2026-01-27 08:01:22,813 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_030500.json
+2026-01-27 08:01:26,270 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_030500_rank0.pt
+2026-01-27 08:32:54,250 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_031000_rank1.pt
+2026-01-27 08:32:55,648 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_031000.pt
+2026-01-27 08:32:55,650 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_031000.json
+2026-01-27 08:32:59,438 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_031000_rank0.pt
+2026-01-27 09:04:00,665 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_031500_rank1.pt
+2026-01-27 09:04:02,610 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_031500.pt
+2026-01-27 09:04:02,616 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_031500.json
+2026-01-27 09:04:06,476 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_031500_rank0.pt
+2026-01-27 09:37:38,590 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_032000_rank1.pt
+2026-01-27 09:37:41,085 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_032000.pt
+2026-01-27 09:37:41,087 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_032000.json
+2026-01-27 09:37:44,681 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_032000_rank0.pt
+2026-01-27 10:08:45,243 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_032500_rank1.pt
+2026-01-27 10:08:46,728 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_032500.pt
+2026-01-27 10:08:46,730 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_032500.json
+2026-01-27 10:08:50,266 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_032500_rank0.pt
+2026-01-27 10:40:18,286 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_033000_rank1.pt
+2026-01-27 10:40:19,659 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_033000.pt
+2026-01-27 10:40:19,662 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_033000.json
+2026-01-27 10:40:23,379 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_033000_rank0.pt
+2026-01-27 11:11:22,945 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_033500_rank1.pt
+2026-01-27 11:11:25,041 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_033500.pt
+2026-01-27 11:11:25,043 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_033500.json
+2026-01-27 11:11:28,519 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_033500_rank0.pt
+2026-01-27 11:45:00,008 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_034000_rank1.pt
+2026-01-27 11:45:02,788 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_034000.pt
+2026-01-27 11:45:02,791 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_034000.json
+2026-01-27 11:45:06,276 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_034000_rank0.pt
+2026-01-27 12:16:05,650 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_034500_rank1.pt
+2026-01-27 12:16:07,580 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_034500.pt
+2026-01-27 12:16:07,582 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_034500.json
+2026-01-27 12:16:11,250 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_034500_rank0.pt
+2026-01-27 12:47:38,069 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_035000_rank1.pt
+2026-01-27 12:47:39,667 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_035000.pt
+2026-01-27 12:47:39,669 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_035000.json
+2026-01-27 12:47:43,408 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_035000_rank0.pt
+2026-01-27 13:18:43,480 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_035500_rank1.pt
+2026-01-27 13:18:45,133 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_035500.pt
+2026-01-27 13:18:45,135 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_035500.json
+2026-01-27 13:18:48,731 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_035500_rank0.pt
+2026-01-27 13:52:22,135 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_036000_rank1.pt
+2026-01-27 13:52:24,766 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_036000.pt
+2026-01-27 13:52:24,769 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_036000.json
+2026-01-27 13:52:28,283 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_036000_rank0.pt
+2026-01-27 14:23:30,518 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_036500_rank1.pt
+2026-01-27 14:23:32,463 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_036500.pt
+2026-01-27 14:23:32,466 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_036500.json
+2026-01-27 14:23:35,965 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_036500_rank0.pt
+2026-01-27 14:55:08,810 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_037000_rank1.pt
+2026-01-27 14:55:10,439 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_037000.pt
+2026-01-27 14:55:10,441 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_037000.json
+2026-01-27 14:55:13,933 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_037000_rank0.pt
+2026-01-27 15:26:13,540 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_037500_rank1.pt
+2026-01-27 15:26:14,893 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_037500.pt
+2026-01-27 15:26:14,896 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_037500.json
+2026-01-27 15:26:18,453 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_037500_rank0.pt
+2026-01-27 15:59:52,698 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_038000_rank1.pt
+2026-01-27 15:59:55,344 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_038000.pt
+2026-01-27 15:59:55,346 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_038000.json
+2026-01-27 15:59:58,799 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_038000_rank0.pt
+2026-01-27 16:31:01,776 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_038500_rank1.pt
+2026-01-27 16:31:03,733 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_038500.pt
+2026-01-27 16:31:03,735 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_038500.json
+2026-01-27 16:31:07,808 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_038500_rank0.pt
+2026-01-27 17:02:38,731 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_039000_rank1.pt
+2026-01-27 17:02:40,314 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_039000.pt
+2026-01-27 17:02:40,317 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_039000.json
+2026-01-27 17:02:43,770 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_039000_rank0.pt
+2026-01-27 17:33:45,647 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_039500_rank1.pt
+2026-01-27 17:33:47,250 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_039500.pt
+2026-01-27 17:33:47,252 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_039500.json
+2026-01-27 17:33:51,029 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_039500_rank0.pt
+2026-01-27 18:07:24,424 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_040000_rank1.pt
+2026-01-27 18:07:26,941 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_040000.pt
+2026-01-27 18:07:26,944 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_040000.json
+2026-01-27 18:07:30,515 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_040000_rank0.pt
+2026-01-27 18:38:30,653 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_040500_rank1.pt
+2026-01-27 18:38:31,956 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_040500.pt
+2026-01-27 18:38:31,959 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_040500.json
+2026-01-27 18:38:35,479 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_040500_rank0.pt
+2026-01-27 19:10:04,612 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_041000_rank1.pt
+2026-01-27 19:10:06,187 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_041000.pt
+2026-01-27 19:10:06,190 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_041000.json
+2026-01-27 19:10:09,747 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_041000_rank0.pt
+2026-01-27 19:41:11,353 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_041500_rank1.pt
+2026-01-27 19:41:12,678 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_041500.pt
+2026-01-27 19:41:12,681 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_041500.json
+2026-01-27 19:41:16,178 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_041500_rank0.pt
+2026-01-27 20:14:52,038 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_042000_rank1.pt
+2026-01-27 20:14:54,547 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_042000.pt
+2026-01-27 20:14:54,550 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_042000.json
+2026-01-27 20:14:58,091 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_042000_rank0.pt
+2026-01-27 20:45:57,366 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_042500_rank1.pt
+2026-01-27 20:45:58,828 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_042500.pt
+2026-01-27 20:45:58,833 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_042500.json
+2026-01-27 20:46:02,259 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_042500_rank0.pt
+2026-01-27 21:17:31,915 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_043000_rank1.pt
+2026-01-27 21:17:33,601 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_043000.pt
+2026-01-27 21:17:33,604 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_043000.json
+2026-01-27 21:17:37,059 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_043000_rank0.pt
+2026-01-27 21:48:37,691 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_043500_rank1.pt
+2026-01-27 21:48:39,163 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_043500.pt
+2026-01-27 21:48:39,166 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_043500.json
+2026-01-27 21:48:42,886 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_043500_rank0.pt
+2026-01-27 22:22:12,981 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_044000_rank1.pt
+2026-01-27 22:22:15,429 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_044000.pt
+2026-01-27 22:22:15,431 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_044000.json
+2026-01-27 22:22:18,981 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_044000_rank0.pt
+2026-01-27 22:53:21,773 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_044500_rank1.pt
+2026-01-27 22:53:23,267 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_044500.pt
+2026-01-27 22:53:23,270 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_044500.json
+2026-01-27 22:53:26,681 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_044500_rank0.pt
+2026-01-27 23:24:58,964 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_045000_rank1.pt
+2026-01-27 23:25:00,579 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_045000.pt
+2026-01-27 23:25:00,582 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_045000.json
+2026-01-27 23:25:04,427 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_045000_rank0.pt
+2026-01-27 23:56:06,285 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_045500_rank1.pt
+2026-01-27 23:56:07,551 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_045500.pt
+2026-01-27 23:56:07,554 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_045500.json
+2026-01-27 23:56:11,270 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_045500_rank0.pt
+2026-01-28 00:29:44,138 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_046000_rank1.pt
+2026-01-28 00:29:46,812 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_046000.pt
+2026-01-28 00:29:46,815 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_046000.json
+2026-01-28 00:29:50,417 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_046000_rank0.pt
+2026-01-28 01:00:56,774 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_046500_rank1.pt
+2026-01-28 01:00:58,219 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_046500.pt
+2026-01-28 01:00:58,221 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_046500.json
+2026-01-28 01:01:01,695 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_046500_rank0.pt
+2026-01-28 01:32:38,042 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_047000_rank1.pt
+2026-01-28 01:32:39,531 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_047000.pt
+2026-01-28 01:32:39,533 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_047000.json
+2026-01-28 01:32:43,028 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_047000_rank0.pt
+2026-01-28 02:03:42,232 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_047500_rank1.pt
+2026-01-28 02:03:43,777 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_047500.pt
+2026-01-28 02:03:43,780 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_047500.json
+2026-01-28 02:03:47,331 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_047500_rank0.pt
+2026-01-28 02:37:18,987 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_048000_rank1.pt
+2026-01-28 02:37:21,598 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_048000.pt
+2026-01-28 02:37:21,600 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_048000.json
+2026-01-28 02:37:25,078 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_048000_rank0.pt
+2026-01-28 03:08:25,696 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_048500_rank1.pt
+2026-01-28 03:08:27,173 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_048500.pt
+2026-01-28 03:08:27,175 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_048500.json
+2026-01-28 03:08:30,907 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_048500_rank0.pt
+2026-01-28 03:39:59,785 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_049000_rank1.pt
+2026-01-28 03:40:01,343 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_049000.pt
+2026-01-28 03:40:01,346 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_049000.json
+2026-01-28 03:40:05,310 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_049000_rank0.pt
+2026-01-28 04:11:04,048 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_049500_rank1.pt
+2026-01-28 04:11:05,835 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_049500.pt
+2026-01-28 04:11:05,837 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_049500.json
+2026-01-28 04:11:09,365 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_049500_rank0.pt
+2026-01-28 04:44:44,480 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_050000_rank1.pt
+2026-01-28 04:44:47,046 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_050000.pt
+2026-01-28 04:44:47,049 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_050000.json
+2026-01-28 04:44:50,520 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_050000_rank0.pt
+2026-01-28 05:15:51,312 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_050500_rank1.pt
+2026-01-28 05:15:52,476 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_050500.pt
+2026-01-28 05:15:52,478 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_050500.json
+2026-01-28 05:15:56,206 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_050500_rank0.pt
+2026-01-28 05:47:26,511 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_051000_rank1.pt
+2026-01-28 05:47:27,974 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_051000.pt
+2026-01-28 05:47:27,976 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_051000.json
+2026-01-28 05:47:31,461 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_051000_rank0.pt
+2026-01-28 06:18:34,153 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_051500_rank1.pt
+2026-01-28 06:18:35,602 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_051500.pt
+2026-01-28 06:18:35,604 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_051500.json
+2026-01-28 06:18:39,177 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_051500_rank0.pt
+2026-01-28 06:52:15,096 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_052000_rank1.pt
+2026-01-28 06:52:17,840 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_052000.pt
+2026-01-28 06:52:17,843 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_052000.json
+2026-01-28 06:52:21,321 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_052000_rank0.pt
+2026-01-28 07:23:21,484 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_052500_rank1.pt
+2026-01-28 07:23:23,416 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_052500.pt
+2026-01-28 07:23:23,419 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_052500.json
+2026-01-28 07:23:27,010 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_052500_rank0.pt
+2026-01-28 07:55:00,233 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_053000_rank1.pt
+2026-01-28 07:55:01,811 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_053000.pt
+2026-01-28 07:55:01,816 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_053000.json
+2026-01-28 07:55:06,352 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_053000_rank0.pt
+2026-01-28 08:26:08,086 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_053500_rank1.pt
+2026-01-28 08:26:09,642 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_053500.pt
+2026-01-28 08:26:09,645 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_053500.json
+2026-01-28 08:26:13,202 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_053500_rank0.pt
+2026-01-28 08:59:50,367 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_054000_rank1.pt
+2026-01-28 08:59:53,153 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_054000.pt
+2026-01-28 08:59:53,155 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_054000.json
+2026-01-28 08:59:56,639 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_054000_rank0.pt
+2026-01-28 09:30:55,422 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_054500_rank1.pt
+2026-01-28 09:30:56,957 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_054500.pt
+2026-01-28 09:30:56,961 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_054500.json
+2026-01-28 09:31:00,814 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_054500_rank0.pt
+2026-01-28 10:02:30,700 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_055000_rank1.pt
+2026-01-28 10:02:32,180 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_055000.pt
+2026-01-28 10:02:32,184 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_055000.json
+2026-01-28 10:02:35,792 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_055000_rank0.pt
+2026-01-28 10:33:36,469 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_055500_rank1.pt
+2026-01-28 10:33:37,832 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_055500.pt
+2026-01-28 10:33:37,834 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_055500.json
+2026-01-28 10:33:41,342 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_055500_rank0.pt
+2026-01-28 11:07:11,393 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_056000_rank1.pt
+2026-01-28 11:07:14,330 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_056000.pt
+2026-01-28 11:07:14,333 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_056000.json
+2026-01-28 11:07:18,026 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_056000_rank0.pt
+2026-01-28 11:38:17,472 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_056500_rank1.pt
+2026-01-28 11:38:19,020 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_056500.pt
+2026-01-28 11:38:19,023 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_056500.json
+2026-01-28 11:38:22,468 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_056500_rank0.pt
+2026-01-28 12:09:51,456 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_057000_rank1.pt
+2026-01-28 12:09:52,770 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_057000.pt
+2026-01-28 12:09:52,772 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_057000.json
+2026-01-28 12:09:56,180 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_057000_rank0.pt
+2026-01-28 12:40:57,245 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_057500_rank1.pt
+2026-01-28 12:40:58,709 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_057500.pt
+2026-01-28 12:40:58,711 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_057500.json
+2026-01-28 12:41:02,331 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_057500_rank0.pt
+2026-01-28 13:14:36,308 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_058000_rank1.pt
+2026-01-28 13:14:39,322 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_058000.pt
+2026-01-28 13:14:39,325 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_058000.json
+2026-01-28 13:14:42,901 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_058000_rank0.pt
+2026-01-28 13:45:45,875 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_058500_rank1.pt
+2026-01-28 13:45:47,569 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_058500.pt
+2026-01-28 13:45:47,573 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_058500.json
+2026-01-28 13:45:51,100 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_058500_rank0.pt
+2026-01-28 14:17:22,112 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_059000_rank1.pt
+2026-01-28 14:17:23,691 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_059000.pt
+2026-01-28 14:17:23,694 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_059000.json
+2026-01-28 14:17:27,233 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_059000_rank0.pt
+2026-01-28 14:48:26,988 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_059500_rank1.pt
+2026-01-28 14:48:28,470 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_059500.pt
+2026-01-28 14:48:28,473 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_059500.json
+2026-01-28 14:48:31,972 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_059500_rank0.pt
+2026-01-28 15:22:08,485 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_060000_rank1.pt
+2026-01-28 15:22:10,768 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_060000.pt
+2026-01-28 15:22:10,771 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_060000.json
+2026-01-28 15:22:14,246 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_060000_rank0.pt
+2026-01-28 15:53:15,909 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_060500_rank1.pt
+2026-01-28 15:53:17,433 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_060500.pt
+2026-01-28 15:53:17,436 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_060500.json
+2026-01-28 15:53:20,879 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_060500_rank0.pt
+2026-01-28 16:24:51,335 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_061000_rank1.pt
+2026-01-28 16:24:52,758 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_061000.pt
+2026-01-28 16:24:52,761 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_061000.json
+2026-01-28 16:24:57,802 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_061000_rank0.pt
+2026-01-28 16:55:58,330 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_061500_rank1.pt
+2026-01-28 16:55:59,923 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_061500.pt
+2026-01-28 16:55:59,926 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_061500.json
+2026-01-28 16:56:03,751 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_061500_rank0.pt
+2026-01-28 17:29:37,001 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_062000_rank1.pt
+2026-01-28 17:29:39,309 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_062000.pt
+2026-01-28 17:29:39,311 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_062000.json
+2026-01-28 17:29:43,002 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_062000_rank0.pt
+2026-01-28 18:00:44,853 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_062500_rank1.pt
+2026-01-28 18:00:46,405 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_062500.pt
+2026-01-28 18:00:46,407 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_062500.json
+2026-01-28 18:00:49,852 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_062500_rank0.pt
+2026-01-28 18:32:20,474 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_063000_rank1.pt
+2026-01-28 18:32:22,070 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_063000.pt
+2026-01-28 18:32:22,072 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_063000.json
+2026-01-28 18:32:25,484 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_063000_rank0.pt
+2026-01-28 19:03:27,211 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_063500_rank1.pt
+2026-01-28 19:03:28,744 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_063500.pt
+2026-01-28 19:03:28,747 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_063500.json
+2026-01-28 19:03:32,304 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_063500_rank0.pt
+2026-01-28 19:37:07,446 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_064000_rank1.pt
+2026-01-28 19:37:10,028 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_064000.pt
+2026-01-28 19:37:10,031 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_064000.json
+2026-01-28 19:37:13,613 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_064000_rank0.pt
+2026-01-28 20:08:15,763 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_064500_rank1.pt
+2026-01-28 20:08:17,416 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_064500.pt
+2026-01-28 20:08:17,419 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_064500.json
+2026-01-28 20:08:20,845 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_064500_rank0.pt
+2026-01-28 20:39:50,485 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_065000_rank1.pt
+2026-01-28 20:39:51,688 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_065000.pt
+2026-01-28 20:39:51,691 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_065000.json
+2026-01-28 20:39:55,169 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_065000_rank0.pt
+2026-01-28 21:10:54,945 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_065500_rank1.pt
+2026-01-28 21:10:56,405 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_065500.pt
+2026-01-28 21:10:56,407 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_065500.json
+2026-01-28 21:10:59,858 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_065500_rank0.pt
+2026-01-28 21:44:38,553 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_066000_rank1.pt
+2026-01-28 21:44:40,933 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_066000.pt
+2026-01-28 21:44:40,936 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_066000.json
+2026-01-28 21:44:44,466 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_066000_rank0.pt
+2026-01-28 22:15:43,454 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_066500_rank1.pt
+2026-01-28 22:15:45,118 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_066500.pt
+2026-01-28 22:15:45,123 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_066500.json
+2026-01-28 22:15:48,731 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_066500_rank0.pt
+2026-01-28 22:47:17,575 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_067000_rank1.pt
+2026-01-28 22:47:19,094 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_067000.pt
+2026-01-28 22:47:19,096 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_067000.json
+2026-01-28 22:47:22,723 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_067000_rank0.pt
+2026-01-28 23:18:24,226 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_067500_rank1.pt
+2026-01-28 23:18:26,021 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_067500.pt
+2026-01-28 23:18:26,023 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_067500.json
+2026-01-28 23:18:29,715 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_067500_rank0.pt
+2026-01-28 23:52:02,690 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_068000_rank1.pt
+2026-01-28 23:52:05,807 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_068000.pt
+2026-01-28 23:52:05,809 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_068000.json
+2026-01-28 23:52:09,251 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_068000_rank0.pt
+2026-01-29 00:23:10,225 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_068500_rank1.pt
+2026-01-29 00:23:11,938 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_068500.pt
+2026-01-29 00:23:11,940 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_068500.json
+2026-01-29 00:23:15,496 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_068500_rank0.pt
+2026-01-29 00:54:44,582 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_069000_rank1.pt
+2026-01-29 00:54:45,896 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_069000.pt
+2026-01-29 00:54:45,899 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_069000.json
+2026-01-29 00:54:49,416 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_069000_rank0.pt
+2026-01-29 01:25:51,962 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_069500_rank1.pt
+2026-01-29 01:25:53,352 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_069500.pt
+2026-01-29 01:25:53,355 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_069500.json
+2026-01-29 01:25:56,736 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_069500_rank0.pt
+2026-01-29 01:59:31,040 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_070000_rank1.pt
+2026-01-29 01:59:33,470 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_070000.pt
+2026-01-29 01:59:33,473 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_070000.json
+2026-01-29 01:59:36,801 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_070000_rank0.pt
+2026-01-29 02:30:37,548 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_070500_rank1.pt
+2026-01-29 02:30:39,064 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_070500.pt
+2026-01-29 02:30:39,067 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_070500.json
+2026-01-29 02:30:42,680 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_070500_rank0.pt
+2026-01-29 03:02:12,533 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_071000_rank1.pt
+2026-01-29 03:02:14,024 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_071000.pt
+2026-01-29 03:02:14,027 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_071000.json
+2026-01-29 03:02:17,556 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_071000_rank0.pt
+2026-01-29 03:33:18,305 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_071500_rank1.pt
+2026-01-29 03:33:19,938 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_071500.pt
+2026-01-29 03:33:19,941 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_071500.json
+2026-01-29 03:33:23,800 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_071500_rank0.pt
+2026-01-29 04:06:58,198 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_072000_rank1.pt
+2026-01-29 04:07:00,856 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_072000.pt
+2026-01-29 04:07:00,859 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_072000.json
+2026-01-29 04:07:04,754 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_072000_rank0.pt
+2026-01-29 04:38:07,262 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_072500_rank1.pt
+2026-01-29 04:38:08,719 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_072500.pt
+2026-01-29 04:38:08,721 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_072500.json
+2026-01-29 04:38:12,311 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_072500_rank0.pt
+2026-01-29 05:09:41,943 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_073000_rank1.pt
+2026-01-29 05:09:43,489 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_073000.pt
+2026-01-29 05:09:43,493 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_073000.json
+2026-01-29 05:09:47,056 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_073000_rank0.pt
+2026-01-29 05:40:49,131 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_073500_rank1.pt
+2026-01-29 05:40:50,357 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_073500.pt
+2026-01-29 05:40:50,359 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_073500.json
+2026-01-29 05:40:53,806 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_073500_rank0.pt
+2026-01-29 06:14:24,408 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_074000_rank1.pt
+2026-01-29 06:14:26,975 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_074000.pt
+2026-01-29 06:14:26,978 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_074000.json
+2026-01-29 06:14:30,998 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_074000_rank0.pt
+2026-01-29 06:45:30,002 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_074500_rank1.pt
+2026-01-29 06:45:31,572 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_074500.pt
+2026-01-29 06:45:31,574 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_074500.json
+2026-01-29 06:45:35,202 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_074500_rank0.pt
+2026-01-29 07:17:05,289 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_075000_rank1.pt
+2026-01-29 07:17:06,902 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_075000.pt
+2026-01-29 07:17:06,905 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_075000.json
+2026-01-29 07:17:10,486 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_075000_rank0.pt
+2026-01-29 07:48:13,980 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_075500_rank1.pt
+2026-01-29 07:48:15,359 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_075500.pt
+2026-01-29 07:48:15,361 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_075500.json
+2026-01-29 07:48:19,049 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_075500_rank0.pt
+2026-01-29 08:21:53,596 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_076000_rank1.pt
+2026-01-29 08:21:56,495 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_076000.pt
+2026-01-29 08:21:56,498 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_076000.json
+2026-01-29 08:22:00,035 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_076000_rank0.pt
+2026-01-29 08:53:00,352 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_076500_rank1.pt
+2026-01-29 08:53:01,969 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_076500.pt
+2026-01-29 08:53:01,972 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_076500.json
+2026-01-29 08:53:05,461 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_076500_rank0.pt
+slurmstepd: error: *** JOB 9387 ON gpuh12 CANCELLED AT 2026-01-29T09:12:44 DUE TO TIME LIMIT ***

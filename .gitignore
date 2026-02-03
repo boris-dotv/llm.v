@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+dev-ignore/
+report.md
+eval_bundle/
+
+# Secrets
+.env
+
+# Local setup
+.claude
+CLAUDE.md
+wandb/
+
+# datasets
+base_data/
+dataset/
+eval_bundle.zip
+identity_conversations.jsonl
+words_alpha.txt
+
+
+# model weights
+tokenizer/
+base_checkpoints/
+mid_checkpoints/
+chatsft_checkpoints/
+chatrl_checkpoints/
+

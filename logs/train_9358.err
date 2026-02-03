@@ -1,0 +1,215 @@
+W0125 19:12:45.309000 419808 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] 
+W0125 19:12:45.309000 419808 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] *****************************************
+W0125 19:12:45.309000 419808 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0125 19:12:45.309000 419808 .venv/lib/python3.12/site-packages/torch/distributed/run.py:803] *****************************************
+2026-01-25 19:12:54,615 - nanochat.flash_attention - [32m[1mINFO[0m - Flash Attention enabled. Using compiled cuda kernels from flash_attn package.
+2026-01-25 19:12:54,617 - nanochat.flash_attention - [32m[1mINFO[0m - Flash Attention enabled. Using compiled cuda kernels from flash_attn package.
+2026-01-25 19:12:56,257 - nanochat.common - [32m[1mINFO[0m - Distributed world size: 2
+wandb: Tracking run with wandb version 0.21.3
+wandb: W&B syncing is set to `offline` in this directory. Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+wandb: Run data is saved locally in /public_hw/share/cit_ztyu/cz/nanochat/wandb/offline-run-20260125_191256-xsauou2o
+2026-01-25 20:17:07,011 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_001000_rank1.pt
+2026-01-25 20:17:08,848 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved model parameters to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/model_001000.pt
+2026-01-25 20:17:08,851 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved metadata to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/meta_001000.json
+2026-01-25 20:17:12,439 - nanochat.checkpoint_manager - [32m[1mINFO[0m - Saved optimizer state to: /public_hw/share/cit_ztyu/cz/nanochat/base_checkpoints/d26/optim_001000_rank0.pt
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1344, in do_open
+[rank1]:     h.request(req.get_method(), req.selector, req.data, headers,
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1338, in request
+[rank1]:     self._send_request(method, url, body, headers, encode_chunked)
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1384, in _send_request
+[rank1]:     self.endheaders(body, encode_chunked=encode_chunked)
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1333, in endheaders
+[rank1]:     self._send_output(message_body, encode_chunked=encode_chunked)
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1093, in _send_output
+[rank1]:     self.send(msg)
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1037, in send
+[rank1]:     self.connect()
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1472, in connect
+[rank1]:     super().connect()
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1003, in connect
+[rank1]:     self.sock = self._create_connection(
+[rank1]:                 ^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/socket.py", line 841, in create_connection
+[rank1]:     for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+[rank1]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/socket.py", line 978, in getaddrinfo
+[rank1]:     for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+[rank1]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]: socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+[rank1]: During handling of the above exception, another exception occurred:
+
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_train.py", line 305, in <module>
+[rank1]:     results = evaluate_model(orig_model, tokenizer, device, max_per_task=args.core_metric_max_per_task)
+[rank1]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_eval.py", line 58, in evaluate_model
+[rank1]:     download_file_with_lock(EVAL_BUNDLE_URL, "eval_bundle.zip", postprocess_fn=place_eval_bundle)
+[rank1]:   File "/public_hw/share/cit_ztyu/cz/nanochat/nanochat/common.py", line 83, in download_file_with_lock
+[rank1]:     with urllib.request.urlopen(url) as response:
+[rank1]:          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 215, in urlopen
+[rank1]:     return opener.open(url, data, timeout)
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 515, in open
+[rank1]:     response = self._open(req, data)
+[rank1]:                ^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 532, in _open
+[rank1]:     result = self._call_chain(self.handle_open, protocol, protocol +
+[rank1]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 492, in _call_chain
+[rank1]:     result = func(*args)
+[rank1]:              ^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1392, in https_open
+[rank1]:     return self.do_open(http.client.HTTPSConnection, req,
+[rank1]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1347, in do_open
+[rank1]:     raise URLError(err)
+[rank1]: urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>
+Traceback (most recent call last):
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1344, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1338, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1384, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1333, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1093, in _send_output
+    self.send(msg)
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1037, in send
+    self.connect()
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1472, in connect
+    super().connect()
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1003, in connect
+    self.sock = self._create_connection(
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/socket.py", line 841, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/socket.py", line 978, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_train.py", line 305, in <module>
+    results = evaluate_model(orig_model, tokenizer, device, max_per_task=args.core_metric_max_per_task)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_eval.py", line 58, in evaluate_model
+    download_file_with_lock(EVAL_BUNDLE_URL, "eval_bundle.zip", postprocess_fn=place_eval_bundle)
+  File "/public_hw/share/cit_ztyu/cz/nanochat/nanochat/common.py", line 83, in download_file_with_lock
+    with urllib.request.urlopen(url) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 515, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 532, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1392, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1347, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1344, in do_open
+[rank0]:     h.request(req.get_method(), req.selector, req.data, headers,
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1338, in request
+[rank0]:     self._send_request(method, url, body, headers, encode_chunked)
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1384, in _send_request
+[rank0]:     self.endheaders(body, encode_chunked=encode_chunked)
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1333, in endheaders
+[rank0]:     self._send_output(message_body, encode_chunked=encode_chunked)
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1093, in _send_output
+[rank0]:     self.send(msg)
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1037, in send
+[rank0]:     self.connect()
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1472, in connect
+[rank0]:     super().connect()
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/http/client.py", line 1003, in connect
+[rank0]:     self.sock = self._create_connection(
+[rank0]:                 ^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/socket.py", line 841, in create_connection
+[rank0]:     for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+[rank0]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/socket.py", line 978, in getaddrinfo
+[rank0]:     for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+[rank0]:                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]: socket.gaierror: [Errno -3] Temporary failure in name resolution
+
+[rank0]: During handling of the above exception, another exception occurred:
+
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_train.py", line 305, in <module>
+[rank0]:     results = evaluate_model(orig_model, tokenizer, device, max_per_task=args.core_metric_max_per_task)
+[rank0]:               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_eval.py", line 58, in evaluate_model
+[rank0]:     download_file_with_lock(EVAL_BUNDLE_URL, "eval_bundle.zip", postprocess_fn=place_eval_bundle)
+[rank0]:   File "/public_hw/share/cit_ztyu/cz/nanochat/nanochat/common.py", line 83, in download_file_with_lock
+[rank0]:     with urllib.request.urlopen(url) as response:
+[rank0]:          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 215, in urlopen
+[rank0]:     return opener.open(url, data, timeout)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 515, in open
+[rank0]:     response = self._open(req, data)
+[rank0]:                ^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 532, in _open
+[rank0]:     result = self._call_chain(self.handle_open, protocol, protocol +
+[rank0]:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 492, in _call_chain
+[rank0]:     result = func(*args)
+[rank0]:              ^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1392, in https_open
+[rank0]:     return self.do_open(http.client.HTTPSConnection, req,
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/urllib/request.py", line 1347, in do_open
+[rank0]:     raise URLError(err)
+[rank0]: urllib.error.URLError: <urlopen error [Errno -3] Temporary failure in name resolution>
+[rank0]:[W125 21:20:13.856336129 ProcessGroupNCCL.cpp:1524] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+W0125 21:20:15.669000 419808 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:908] Sending process 419988 closing signal SIGTERM
+E0125 21:20:15.889000 419808 .venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/api.py:882] failed (exitcode: 1) local_rank: 1 (pid: 419989) of binary: /public_hw/share/cit_ztyu/cz/nanochat/.venv/bin/python3
+Traceback (most recent call last):
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/bin/torchrun", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 357, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 936, in main
+    run(args)
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/torch/distributed/run.py", line 927, in run
+    elastic_launch(
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 156, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 293, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+/public_hw/share/cit_ztyu/cz/nanochat/scripts/base_train.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2026-01-25_21:20:15
+  host      : gpuh10
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 419989)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+[W125 21:20:16.090285237 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

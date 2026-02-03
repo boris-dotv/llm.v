@@ -1,0 +1,201 @@
+Removing incomplete file 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.fb48b1f52adb0d7fc5d3a6d9254369910a994722.incomplete' (hf_transfer=True)
+Downloading '.gitattributes' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.fb48b1f52adb0d7fc5d3a6d9254369910a994722.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/.gitattributes
+Downloading 'README.md' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/Xn7B-BWUGOee2Y6hCZtEhtFu4BE=.08de94c560ad7420252bff6e4729f1d1683def4f.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/README.md
+Downloading 'abstract_algebra/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/abstract_algebra/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.e778f60903669e953c49f0d3c8deffa1738a81fe344e0bf1791e450a5e8b9d6c.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/abstract_algebra/dev-00000-of-00001.parquet
+Downloading 'abstract_algebra/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/abstract_algebra/iln7FAK8ScOKT0OL8tHV8680tg8=.92338cdcdb43d2871691ef9a0e125e633ca57335ed635a635fe6dead94f224c2.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/abstract_algebra/test-00000-of-00001.parquet
+Downloading 'abstract_algebra/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/abstract_algebra/JcQKHXJQlY5NyliaxdyIOjWMSUk=.b66df87644982b96b6708b1748cf5cdd4c45c476b80ee5f33d1bf104d397f840.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/abstract_algebra/validation-00000-of-00001.parquet
+Downloading 'all/auxiliary_train-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/all/8OcA1pTslIL4uYHXmW1hbagvEvA=.5126bb35f06c8ab7ac54be3c60ab02cf33adf8b93a79dcfeb071f53cac74efde.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/all/auxiliary_train-00000-of-00001.parquet
+Downloading 'all/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/all/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.2b19bde1ed8ca6b482fb283abc90e8e0d9d228947029c0b91795d64b28b3bc3f.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/all/dev-00000-of-00001.parquet
+Downloading 'all/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/all/iln7FAK8ScOKT0OL8tHV8680tg8=.74a41822ce7d3def56e1682f958469c04642a5336a5ce912fa375fdb90fb25d7.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/all/test-00000-of-00001.parquet
+Downloading 'all/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/all/JcQKHXJQlY5NyliaxdyIOjWMSUk=.66cdf0b090ccb657d18d13cd81e31fdc55c3467da9642ffb178653268a97c8ef.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/all/validation-00000-of-00001.parquet
+Downloading 'anatomy/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/anatomy/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.1774b4af192a38e8ed6419fa0c5173aabd3f6ebaea10cd65e8cae26b9baed658.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/anatomy/dev-00000-of-00001.parquet
+Downloading 'anatomy/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/anatomy/iln7FAK8ScOKT0OL8tHV8680tg8=.cb88f5920b67ab290dd23a825f8e3826d01d8f48d99ad4931a8b0003a952a211.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/anatomy/test-00000-of-00001.parquet
+Downloading 'anatomy/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/anatomy/JcQKHXJQlY5NyliaxdyIOjWMSUk=.f99c5b6b26a8970a4b91c3a58367768a0bc291a478589c4cd47503ac941cfadc.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/anatomy/validation-00000-of-00001.parquet
+Downloading 'astronomy/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/astronomy/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.73b897f92f1f5982c689cbcf7220d3454b18a589deda6596e738e1a21ad469a4.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/astronomy/dev-00000-of-00001.parquet
+Downloading 'astronomy/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/astronomy/iln7FAK8ScOKT0OL8tHV8680tg8=.bcdfe1afcb9421747b4edd8d426ac87d47fd4d03e7c3455bcb149d1ba14db228.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/astronomy/test-00000-of-00001.parquet
+Downloading 'astronomy/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/astronomy/JcQKHXJQlY5NyliaxdyIOjWMSUk=.98b9cdb9327b80ba66eb92f3726293938e096388c33afec8ffc736e9308174ee.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/astronomy/validation-00000-of-00001.parquet
+Downloading 'auxiliary_train/train-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/auxiliary_train/jhdVX7QxSai5xYQbu6FpvD3SSxM=.ae6662576ef989fed82a9289da1b89e950499c320f6849b052ec344dfcb709eb.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/auxiliary_train/train-00000-of-00001.parquet
+Downloading 'business_ethics/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/business_ethics/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.494ea1d948ca9a7519fda526bbe18812ad5fdd9834b3cb01f6b0d2c3821d189c.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/business_ethics/dev-00000-of-00001.parquet
+Downloading 'business_ethics/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/business_ethics/iln7FAK8ScOKT0OL8tHV8680tg8=.7910a4b8236c64ef339410a41d5806637087c84635278dda0ff674b8f894dfbb.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/business_ethics/test-00000-of-00001.parquet
+Downloading 'business_ethics/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/business_ethics/JcQKHXJQlY5NyliaxdyIOjWMSUk=.3a899aef15e318b267b39cfbb881606c5df0db9930e19dc470c9fda659b78195.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/business_ethics/validation-00000-of-00001.parquet
+Downloading 'clinical_knowledge/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/clinical_knowledge/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.105b492234b3de901223567bf9c72e4f87fe7f701f16b3ef903f1e8a4bb00913.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/clinical_knowledge/dev-00000-of-00001.parquet
+Downloading 'clinical_knowledge/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/clinical_knowledge/iln7FAK8ScOKT0OL8tHV8680tg8=.7bd3de302db35c6e9adb311ef40b2fb15ffe02ada17667119d9fb30fe393a44e.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/clinical_knowledge/test-00000-of-00001.parquet
+Downloading 'clinical_knowledge/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/clinical_knowledge/JcQKHXJQlY5NyliaxdyIOjWMSUk=.2337cba283032fc3dbbb0a7203fddd8ff1a3a5ed348328fe9df1199e57fefb97.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/clinical_knowledge/validation-00000-of-00001.parquet
+Downloading 'college_biology/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_biology/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.0cf3cbb4fde72b09ed0659e81fb1e01fc66f92aecdf87ba5967ee6548d05d555.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_biology/dev-00000-of-00001.parquet
+Downloading 'college_biology/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_biology/iln7FAK8ScOKT0OL8tHV8680tg8=.5b6920ddbbb40ee6efd1e6c8814be9fd03d24c9e1e1dbd4b02325e2d454a6a82.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_biology/test-00000-of-00001.parquet
+Downloading 'college_biology/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_biology/JcQKHXJQlY5NyliaxdyIOjWMSUk=.f5010d257812f7f349e3bd6469be9380d083fe879694c05035663d8e6227344c.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_biology/validation-00000-of-00001.parquet
+Downloading 'college_chemistry/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_chemistry/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.4c689a238a2795d02174ce3b7f621fd0cd721d8a19a6ac3e90e739deb7d1b8c9.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_chemistry/dev-00000-of-00001.parquet
+Downloading 'college_chemistry/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_chemistry/iln7FAK8ScOKT0OL8tHV8680tg8=.f012f90fc3aec5ead6963fe7bdeee58783010265538dda3be984a9d1dbbd7051.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_chemistry/test-00000-of-00001.parquet
+Downloading 'college_chemistry/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_chemistry/JcQKHXJQlY5NyliaxdyIOjWMSUk=.e394d9086108394ef71b8a2fa9f50fab42f4cbd910fa5e5dcd492fa8c927c2d4.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_chemistry/validation-00000-of-00001.parquet
+Downloading 'college_computer_science/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_computer_science/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.6b35dffa1635615b201047dc10ae20ae2daa97cfa403128ebe2285f704a744a7.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_computer_science/dev-00000-of-00001.parquet
+Downloading 'college_computer_science/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_computer_science/iln7FAK8ScOKT0OL8tHV8680tg8=.08b79916057e75938a2a0d5ceb10c517cf923580e6058af48b1b7b3f7a52c5b8.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_computer_science/test-00000-of-00001.parquet
+Downloading 'college_computer_science/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_computer_science/JcQKHXJQlY5NyliaxdyIOjWMSUk=.967090233faa5cd90c4c6f593c5e94d3ede99ab77bc008313aa6428c15ae15ec.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_computer_science/validation-00000-of-00001.parquet
+Downloading 'college_mathematics/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_mathematics/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.46ee5c84b379e1959b020786752c96c2a34a9d0cb52a9b247798dbc794bc324d.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_mathematics/dev-00000-of-00001.parquet
+Downloading 'college_mathematics/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_mathematics/iln7FAK8ScOKT0OL8tHV8680tg8=.f57b57e992d03d07a05c6f8f328a14a49870f61d91e8e525a062644e234bf4f0.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_mathematics/test-00000-of-00001.parquet
+Downloading 'college_mathematics/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_mathematics/JcQKHXJQlY5NyliaxdyIOjWMSUk=.e668d0830970536e21544d6221369ccaeaf75bd7f62cdef5eda8b37d9eca6a6c.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_mathematics/validation-00000-of-00001.parquet
+Downloading 'college_medicine/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_medicine/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.85bf7f27b795f63a87bb149b73f30acd182f1b04ee4573e36ba80c41ee81ff58.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_medicine/dev-00000-of-00001.parquet
+Downloading 'college_medicine/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_medicine/iln7FAK8ScOKT0OL8tHV8680tg8=.f21b3166975dbc14dff5940df41479bc28853008303c50a070d430fc59468f9c.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_medicine/test-00000-of-00001.parquet
+Downloading 'college_medicine/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_medicine/JcQKHXJQlY5NyliaxdyIOjWMSUk=.4b5a104770d73a2e4676869db26f107493286ef2a1a542eb893d5c2bfba762a2.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_medicine/validation-00000-of-00001.parquet
+Downloading 'college_physics/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_physics/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.eec8b9851f44831e3e8c82317c498c81ea3bc3a255d1f9004c26ea7e57728184.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_physics/dev-00000-of-00001.parquet
+Downloading 'college_physics/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_physics/iln7FAK8ScOKT0OL8tHV8680tg8=.81b8eafc776b3109fd0ba9f527a7f759b07b92fe953743d3711086e5208aadca.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_physics/test-00000-of-00001.parquet
+Downloading 'college_physics/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/college_physics/JcQKHXJQlY5NyliaxdyIOjWMSUk=.79f20c0d67a0497e6ebc0c434bb0aa562b24d8ec825e22eb94196c3f34317d7d.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/college_physics/validation-00000-of-00001.parquet
+Downloading 'computer_security/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/computer_security/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.b491f6df6ed1fc6c6a345567bee8240d9e937801a39e626ac62f69619c13eaaa.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/computer_security/dev-00000-of-00001.parquet
+Downloading 'computer_security/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/computer_security/iln7FAK8ScOKT0OL8tHV8680tg8=.a6ad5774acf5133ac88cf1bb066c60db8668abee2d6a724cf2f9dfa7cb4f103d.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/computer_security/test-00000-of-00001.parquet
+Downloading 'computer_security/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/computer_security/JcQKHXJQlY5NyliaxdyIOjWMSUk=.1eaed4c8c709c36aaf1e7911c5454aa35de310e64b0242a76beffc9df7c98d9f.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/computer_security/validation-00000-of-00001.parquet
+Downloading 'conceptual_physics/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/conceptual_physics/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.1503db27184855758b61b52619317f483fe425293c1801853d3e409d1f5a668d.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/conceptual_physics/dev-00000-of-00001.parquet
+Downloading 'conceptual_physics/test-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/conceptual_physics/iln7FAK8ScOKT0OL8tHV8680tg8=.c66a861048a25f96baa59517b613c3ed1a26abf4d7717ae5aab2da29bac7fa70.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/conceptual_physics/test-00000-of-00001.parquet
+Downloading 'conceptual_physics/validation-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/conceptual_physics/JcQKHXJQlY5NyliaxdyIOjWMSUk=.c6df7c8fd416f1239aa2950893468df0ab378b0b67d5bf18362ad95bff44b210.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/conceptual_physics/validation-00000-of-00001.parquet
+Downloading 'data.tar' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/xk9GQ7Jsu9_po6WmFBRCvpGoX10=.bec563ba4bac1d6aaf04141cd7d1605d7a5ca833e38f994051e818489592989b.incomplete'
+Download complete. Moving file to base_data/hf_datasets/cais___mmlu/data.tar
+Downloading 'econometrics/dev-00000-of-00001.parquet' to 'base_data/hf_datasets/cais___mmlu/.cache/huggingface/download/econometrics/1SgWJ6W7m_vqxAgDFHcyoutC3mE=.5edd31ddb8ce550de5b7e51b1f622cc7d83f82714509f81e86cc80f224e91179.incomplete'
+[33m⚠️  Warning: 'huggingface-cli download' is deprecated. Use 'hf download' instead.[0m
+Traceback (most recent call last):
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+               ^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/ssl.py", line 455, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/ssl.py", line 1041, in _create
+    self.do_handshake()
+  File "/public_hw/home/cit_zhishuliu/miniconda3/envs/py312nano/lib/python3.12/ssl.py", line 1319, in do_handshake
+    self._sslobj.do_handshake()
+TimeoutError: _ssl.c:993: The handshake operation timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/requests/adapters.py", line 644, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/util/retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 488, in _make_request
+    raise new_e
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 466, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=conn.timeout)
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='cas-bridge.xethub.hf.co', port=443): Read timed out. (read timeout=10)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/bin/huggingface-cli", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/commands/huggingface_cli.py", line 61, in main
+    service.run()
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/commands/download.py", line 157, in run
+    print(self._download())  # Print path to downloaded files
+          ^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/commands/download.py", line 191, in _download
+    return snapshot_download(
+           ^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 330, in snapshot_download
+    _inner_hf_hub_download(file)
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/_snapshot_download.py", line 306, in _inner_hf_hub_download
+    return hf_hub_download(
+           ^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_validators.py", line 114, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 990, in hf_hub_download
+    return _hf_hub_download_to_local_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1300, in _hf_hub_download_to_local_dir
+    _download_to_tmp_and_move(
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 1738, in _download_to_tmp_and_move
+    http_get(
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 426, in http_get
+    r = _request_wrapper(
+        ^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/file_download.py", line 309, in _request_wrapper
+    response = http_backoff(method=method, url=url, **params, retry_on_exceptions=(), retry_on_status_codes=(429,))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 310, in http_backoff
+    response = session.request(method=method, url=url, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/huggingface_hub/utils/_http.py", line 96, in send
+    return super().send(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/public_hw/share/cit_ztyu/cz/nanochat/.venv/lib/python3.12/site-packages/requests/adapters.py", line 690, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: (ReadTimeoutError("HTTPSConnectionPool(host='cas-bridge.xethub.hf.co', port=443): Read timed out. (read timeout=10)"), '(Request ID: 1f229281-1b58-4e23-ae72-abfab997f169)')

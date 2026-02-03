@@ -1,0 +1,17 @@
+Removing incomplete file 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.227449ad6054efe1ce07c6aa12090bc57103f85f.incomplete' (hf_transfer=True)
+Downloading '.gitattributes' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.227449ad6054efe1ce07c6aa12090bc57103f85f.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/.gitattributes
+Downloading 'README.md' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/Xn7B-BWUGOee2Y6hCZtEhtFu4BE=.ad25b2c451d0fcd2793678b2baa917c962acf281.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/README.md
+Downloading 'eval.yaml' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/aQg1tCIphHdTa9ubFV7tqgKHjzE=.f3e73f8553be0ef91630ee4006fa0dfef00d3aee.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/eval.yaml
+Downloading 'main/test-00000-of-00001.parquet' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/main/iln7FAK8ScOKT0OL8tHV8680tg8=.ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/main/test-00000-of-00001.parquet
+Downloading 'main/train-00000-of-00001.parquet' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/main/jhdVX7QxSai5xYQbu6FpvD3SSxM=.ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/main/train-00000-of-00001.parquet
+Downloading 'socratic/test-00000-of-00001.parquet' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/socratic/iln7FAK8ScOKT0OL8tHV8680tg8=.477dba7028204b465491b8f346ec774262ccd77147d942a0881e94cc6da7c99e.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/socratic/test-00000-of-00001.parquet
+Downloading 'socratic/train-00000-of-00001.parquet' to 'base_data/hf_datasets/openai___gsm8k/.cache/huggingface/download/socratic/jhdVX7QxSai5xYQbu6FpvD3SSxM=.54eb5fd2105a9126ac6410541b2e9dbe0199701258957c9af02d9ed675c90378.incomplete'
+Download complete. Moving file to base_data/hf_datasets/openai___gsm8k/socratic/train-00000-of-00001.parquet
+[33m⚠️  Warning: 'huggingface-cli download' is deprecated. Use 'hf download' instead.[0m
+/public_hw/share/cit_ztyu/cz/nanochat/base_data/hf_datasets/openai___gsm8k
