@@ -212,6 +212,9 @@ MIT
 # git info
 git config user.name "boris-dotv"
 git config user.email "1322553126@qq.com"
+
+# 彻底解决 wsl 不能翻墙的问题
+# https://blog.csdn.net/u011119817/article/details/130745551
 ```
 
 
