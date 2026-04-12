@@ -131,6 +131,74 @@ class KVCache:
         self.v_cache[:, :, :other_pos, :, :] = other.v_cache[:, :, :other_pos, :, :]
         self.cache_seqlens.fill_(other_pos)
 
+
+class HybridKVCache(KVCache):
+    """
+    Extended KV cache for SALA hybrid models.
+
+    Sparse/dense layers use the standard KV cache (inherited from KVCache).
+    Linear attention layers use a fixed-size recurrent state: (B, n_head, head_dim, head_dim).
+    """
+
+    def __init__(self, batch_size, num_heads, seq_len, head_dim, num_layers, device, dtype, attn_types):
+        # Only allocate KV cache tensors for non-linear layers
+        n_sparse_layers = sum(1 for t in attn_types if t != "linear")
+        super().__init__(batch_size, num_heads, seq_len, head_dim, n_sparse_layers, device, dtype)
+        # Override n_layers to total layer count so advance() triggers correctly.
+        # CausalSelfAttention.forward checks `layer_idx == kv_cache.n_layers - 1`
+        # to decide when to call advance(). This must match the actual last layer index.
+        self.n_layers = num_layers
+        self.attn_types = attn_types
+        self.total_layers = num_layers
+        # Map from global layer_idx to sparse-cache layer_idx
+        self._sparse_layer_map = {}
+        sparse_idx = 0
+        for i, t in enumerate(attn_types):
+            if t != "linear":
+                self._sparse_layer_map[i] = sparse_idx
+                sparse_idx += 1
+        # Recurrent states for linear layers: (B, n_head, head_dim, head_dim) per layer
+        self.linear_states = {}
+        for i, t in enumerate(attn_types):
+            if t == "linear":
+                self.linear_states[i] = torch.zeros(
+                    batch_size, num_heads, head_dim, head_dim,
+                    device=device, dtype=dtype
+                )
+
+    def get_layer_cache(self, layer_idx):
+        """Return (k_cache, v_cache) views for a sparse/dense layer."""
+        sparse_idx = self._sparse_layer_map[layer_idx]
+        return self.k_cache[sparse_idx], self.v_cache[sparse_idx]
+
+    def get_linear_state(self, layer_idx):
+        """Return recurrent state for a linear layer."""
+        return self.linear_states[layer_idx]
+
+    def set_linear_state(self, layer_idx, state):
+        """Update recurrent state for a linear layer."""
+        self.linear_states[layer_idx] = state
+
+    def reset(self):
+        """Reset all cache state."""
+        super().reset()
+        for k in self.linear_states:
+            self.linear_states[k].zero_()
+
+    def prefill(self, other):
+        """Copy cached state from another HybridKVCache."""
+        assert self.get_pos() == 0, "Cannot prefill a non-empty KV cache"
+        assert self.total_layers == other.total_layers
+        # Copy KV cache for sparse layers
+        other_pos = other.get_pos()
+        n_sparse = self.k_cache.shape[0]
+        self.k_cache[:, :, :other_pos, :, :] = other.k_cache[:n_sparse, :, :other_pos, :, :]
+        self.v_cache[:, :, :other_pos, :, :] = other.v_cache[:n_sparse, :, :other_pos, :, :]
+        self.cache_seqlens.fill_(other_pos)
+        # Copy linear states
+        for layer_idx in self.linear_states:
+            self.linear_states[layer_idx].copy_(other.linear_states[layer_idx])
+
 # -----------------------------------------------------------------------------
 @torch.inference_mode()
 def sample_next_token(logits, rng, temperature=1.0, top_k=None):

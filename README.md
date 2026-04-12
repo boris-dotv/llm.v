@@ -79,6 +79,48 @@ Total wall clock time: 3h51m
 
 (Your table might be missing the RL number by default). For a lot more information around the speedrun script and what to look for and expect, please refer to the walkthrough that I posted in Discussions of the repo: ["Introducing nanochat: The best ChatGPT that $100 can buy"](https://github.com/karpathy/nanochat/discussions/1).
 
+## SALA Hybrid Model (Sparse + Linear Attention)
+
+nanochat now supports training SALA-style hybrid models that combine **sparse attention** (InfLLM-V2) on 25% of layers with **linear attention** (SimpleGLA/Lightning Attention) on 75% of layers. This enables efficient long-context modeling up to 128K tokens on 8xH100.
+
+### Architecture
+
+- **Sparse layers** (8 of 32): Standard softmax attention with InfLLM-V2 top-k block selection for long sequences. Use GQA (2 KV heads) and NoPE (no positional encoding) for long-range recall.
+- **Linear layers** (24 of 32): SimpleGLA with ALiBi-style decay. O(n) compute and constant-size recurrent state. Full MHA (16 KV heads) with RoPE.
+- **HyPE** (Hybrid Positional Encoding): RoPE on linear layers, NoPE on sparse layers.
+- **Output gates**: Sigmoid gating on both layer types for training stability.
+- **Gradient checkpointing**: For memory-efficient long-context training.
+
+### Training Pipeline
+
+The SALA model follows a **dense-first, then convert** paradigm from the [MiniCPM-SALA paper](https://huggingface.co/openbmb/MiniCPM-SALA):
+
+```
+Stage 1: Dense pretrain (d32, ~2B params, 4K context, ~40B tokens)
+Stage 2: HALO conversion (convert 75% layers to linear attention, ~1.3B tokens at 512 context)
+Stage 3: Continual stable-training (all params, sparse disabled, 4K context, ~30B tokens)
+Stage 4: Long-context adaptation (sparse enabled, 32K → 64K → 128K, ~20B tokens)
+Stage 5: SFT + downstream (existing pipeline)
+```
+
+Run end-to-end:
+
+```bash
+bash runs/sala_train.sh
+```
+
+### Dependencies
+
+SALA requires two additional packages:
+
+```bash
+# Linear attention kernels
+pip install fla
+
+# InfLLM-V2 sparse attention CUDA kernels (build from source)
+cd /path/to/infllmv2_cuda_impl && pip install -e .
+```
+
 ## Bigger models
 
 Unsurprisingly, $100 is not enough to train a highly performant ChatGPT clone. In fact, LLMs are famous for their multi-million dollar capex. For our purposes, I think there are two more scales of interest. First is the ~$300 tier d26 model (i.e. depth=26) that trains in ~12 hours, which slightly outperforms GPT-2 CORE score. Second is the $1000 tier (~41.6 hours), just because it's a nice round number. But both of these are not yet fully supported and therefore not attached here in the master branch yet.
@@ -151,13 +193,15 @@ python -m pytest tests/test_engine.py -v -s
 │   ├── core_eval.py                # Evaluates base model CORE score (DCLM paper)
 │   ├── dataloader.py               # Tokenizing Distributed Data Loader
 │   ├── dataset.py                  # Download/read utils for pretraining data
-│   ├── engine.py                   # Efficient model inference with KV Cache
+│   ├── engine.py                   # Efficient model inference with KV Cache + HybridKVCache
 │   ├── execution.py                # Allows the LLM to execute Python code as tool
-│   ├── gpt.py                      # The GPT nn.Module Transformer
+│   ├── gpt.py                      # The GPT nn.Module Transformer (dense + SALA hybrid)
+│   ├── linear_attention.py         # LightningAttention (SimpleGLA) for SALA hybrid model
 │   ├── logo.svg
 │   ├── loss_eval.py                # Evaluate bits per byte (instead of loss)
 │   ├── muon.py                     # Distributed Muon optimizer
 │   ├── report.py                   # Utilities for writing the nanochat Report
+│   ├── sparse_attention.py         # InfLLM-V2 sparse attention dispatch
 │   ├── tokenizer.py                # BPE Tokenizer wrapper in style of GPT-4
 │   └── ui.html                     # HTML/CSS/JS for nanochat frontend
 ├── pyproject.toml
@@ -165,6 +209,7 @@ python -m pytest tests/test_engine.py -v -s
 │   ├── miniseries.sh               # Miniseries training script
 │   ├── run1000.sh                  # Train the ~$800 nanochat d32
 │   ├── runcpu.sh                   # Small example of how to run on CPU/MPS
+│   ├── sala_train.sh               # SALA hybrid model end-to-end pipeline
 │   ├── scaling_laws.sh             # Scaling laws experiments
 │   └── speedrun.sh                 # Train the ~$100 nanochat d20
 ├── scripts
@@ -176,6 +221,10 @@ python -m pytest tests/test_engine.py -v -s
 │   ├── chat_rl.py                  # Chat model (SFT/Mid): reinforcement learning
 │   ├── chat_sft.py                 # Chat model: train SFT
 │   ├── chat_web.py                 # Chat model (SFT/Mid): talk to over WebUI
+│   ├── continual_train.py          # SALA: continual stable-training (stage 3)
+│   ├── halo_convert.py             # SALA: HALO dense-to-hybrid conversion (stage 2a)
+│   ├── halo_train.py               # SALA: HALO fine-tune linear layers (stage 2b)
+│   ├── longctx_train.py            # SALA: long-context adaptation (stage 4)
 │   ├── mid_train.py                # Chat model: midtraining
 │   ├── tok_eval.py                 # Tokenizer: evaluate compression rate
 │   └── tok_train.py                # Tokenizer: train it

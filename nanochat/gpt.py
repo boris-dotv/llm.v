@@ -38,6 +38,28 @@ class GPTConfig:
     # Characters: L=long (full context), S=short (half context)
     # Examples: "L"=all full context, "SL"=alternating, "SSL"=two short then one long
     window_pattern: str = "SSSL"
+    # --- SALA hybrid attention fields ---
+    # Per-layer attention type: "dense" (softmax, optionally sparse via InfLLM-V2) or "linear"
+    # (SimpleGLA). None = all dense (backward compat with existing checkpoints).
+    attn_types: list = None
+    # KV heads for dense/sparse layers. -1 = use n_kv_head. Set to e.g. 2 for GQA on sparse layers.
+    n_kv_head_sparse: int = -1
+    # Add sigmoid output gate after attention (o_gate on sparse layers, z_proj on linear layers)
+    use_output_gate: bool = False
+    # HyPE: apply RoPE on linear layers, NoPE on sparse layers (for long-range recall)
+    use_hype: bool = False
+    # RoPE base frequency. Increase for long context (e.g. 100000 for NTK-aware scaling).
+    rope_theta: float = 10000.0
+    # Wrap each block forward in torch.utils.checkpoint for memory-efficient long-context training
+    use_gradient_checkpointing: bool = False
+    # InfLLM-V2 sparse attention config (only used when sparse is enabled on dense-type layers)
+    sparse_block_size: int = 64
+    sparse_kernel_size: int = 32      # k1 compression kernel window
+    sparse_kernel_stride: int = 16    # k1 compression stride
+    sparse_topk: int = 63             # top-k blocks to select
+    sparse_init_blocks: int = 1       # initial blocks always attended
+    sparse_local_blocks: int = 32     # local/sliding window blocks
+    sparse_dense_len: int = 8192      # below this seq length, sparse layers use standard dense attn
 
 
 def norm(x):
@@ -58,11 +80,15 @@ def apply_rotary_emb(x, cos, sin):
     return torch.cat([y1, y2], 3)
 
 class CausalSelfAttention(nn.Module):
-    def __init__(self, config, layer_idx):
+    def __init__(self, config, layer_idx, is_sparse_layer=False):
         super().__init__()
         self.layer_idx = layer_idx
         self.n_head = config.n_head
-        self.n_kv_head = config.n_kv_head
+        # Sparse layers can use fewer KV heads (GQA) for KV compression
+        if is_sparse_layer and config.n_kv_head_sparse > 0:
+            self.n_kv_head = config.n_kv_head_sparse
+        else:
+            self.n_kv_head = config.n_kv_head
         self.n_embd = config.n_embd
         self.head_dim = self.n_embd // self.n_head
         assert self.n_embd % self.n_head == 0
@@ -73,6 +99,10 @@ class CausalSelfAttention(nn.Module):
         self.c_proj = nn.Linear(self.n_embd, self.n_embd, bias=False)
         self.ve_gate_channels = 32
         self.ve_gate = nn.Linear(self.ve_gate_channels, self.n_kv_head, bias=False) if has_ve(layer_idx, config.n_layer) else None
+        # Output gate (SALA: o_gate on sparse layers)
+        self.o_gate = nn.Linear(self.n_embd, self.n_head * self.head_dim, bias=False) if config.use_output_gate else None
+        # HyPE: sparse layers do NOT use RoPE (NoPE for long-range recall)
+        self.use_rope = not (config.use_hype and is_sparse_layer)
 
     def forward(self, x, ve, cos_sin, window_size, kv_cache):
         B, T, C = x.size()
@@ -89,9 +119,10 @@ class CausalSelfAttention(nn.Module):
             gate = 2 * torch.sigmoid(self.ve_gate(x[..., :self.ve_gate_channels]))  # (B, T, n_kv_head), range (0, 2)
             v = v + gate.unsqueeze(-1) * ve
 
-        # Apply Rotary Embeddings to queries and keys to get relative positional encoding
-        cos, sin = cos_sin
-        q, k = apply_rotary_emb(q, cos, sin), apply_rotary_emb(k, cos, sin)
+        # Apply Rotary Embeddings (conditionally — HyPE: sparse layers skip RoPE)
+        if self.use_rope:
+            cos, sin = cos_sin
+            q, k = apply_rotary_emb(q, cos, sin), apply_rotary_emb(k, cos, sin)
         q, k = norm(q), norm(k) # QK norm
 
         # Flash Attention (FA3 on Hopper+, PyTorch SDPA fallback elsewhere)
@@ -109,12 +140,14 @@ class CausalSelfAttention(nn.Module):
                 causal=True,
                 window_size=window_size,
             )
-            # Advance position after last layer processes
-            if self.layer_idx == kv_cache.n_layers - 1:
-                kv_cache.advance(T)
 
         # Re-assemble the heads and project back to residual stream
         y = y.contiguous().view(B, T, -1)
+
+        # Output gate (SALA): sigmoid gating before projection
+        if self.o_gate is not None:
+            y = y * torch.sigmoid(self.o_gate(x))
+
         y = self.c_proj(y)
         return y
 
@@ -133,9 +166,15 @@ class MLP(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, config, layer_idx):
+    def __init__(self, config, layer_idx, attn_type="dense"):
         super().__init__()
-        self.attn = CausalSelfAttention(config, layer_idx)
+        if attn_type == "linear":
+            from nanochat.linear_attention import LightningAttention
+            self.attn = LightningAttention(config, layer_idx)
+        else:
+            # "dense" — used for both standard dense and InfLLM-V2 sparse attention
+            is_sparse = attn_type == "dense" and config.attn_types is not None
+            self.attn = CausalSelfAttention(config, layer_idx, is_sparse_layer=is_sparse)
         self.mlp = MLP(config)
 
     def forward(self, x, ve, cos_sin, window_size, kv_cache):
@@ -153,17 +192,32 @@ class GPT(nn.Module):
         """
         super().__init__()
         self.config = config
+        # Resolve per-layer attention types (None = all dense for backward compat)
+        self.attn_types = config.attn_types or ["dense"] * config.n_layer
+        assert len(self.attn_types) == config.n_layer, f"attn_types length {len(self.attn_types)} != n_layer {config.n_layer}"
         # Compute per-layer window sizes for sliding window attention
         # window_size is (left, right) tuple: (-1, 0) for full context, (N, 0) for sliding window
         self.window_sizes = self._compute_window_sizes(config)
+        # For linear layers, window_size is ignored — set to (-1, 0) to avoid confusion
+        for i in range(config.n_layer):
+            if self.attn_types[i] == "linear":
+                self.window_sizes[i] = (-1, 0)
+        # Flag to disable InfLLM-V2 sparse dispatch (sparse layers fall back to dense FlashAttention).
+        # Linear layers are NOT affected — they always use SimpleGLA.
+        self.disable_sparse = False
         # Pad vocab for efficiency (DDP, tensor cores). This is just an optimization - outputs are cropped in forward().
         # https://huggingface.co/docs/transformers/main_classes/model#transformers.PreTrainedModel.resize_token_embeddings
         padded_vocab_size = ((config.vocab_size + pad_vocab_size_to - 1) // pad_vocab_size_to) * pad_vocab_size_to
         if padded_vocab_size != config.vocab_size:
             print0(f"Padding vocab_size from {config.vocab_size} to {padded_vocab_size} for efficiency")
+        # Construct blocks with per-layer attention type
+        blocks = []
+        for layer_idx in range(config.n_layer):
+            attn_type = self.attn_types[layer_idx]
+            blocks.append(Block(config, layer_idx, attn_type=attn_type))
         self.transformer = nn.ModuleDict({
             "wte": nn.Embedding(padded_vocab_size, config.n_embd),
-            "h": nn.ModuleList([Block(config, layer_idx) for layer_idx in range(config.n_layer)]),
+            "h": nn.ModuleList(blocks),
         })
         self.lm_head = nn.Linear(config.n_embd, padded_vocab_size, bias=False)
         # Per-layer learnable scalars (inspired by modded-nanogpt)
@@ -173,9 +227,18 @@ class GPT(nn.Module):
         self.resid_lambdas = nn.Parameter(torch.ones(config.n_layer))   # fake init, real init in init_weights()
         self.x0_lambdas = nn.Parameter(torch.zeros(config.n_layer))     # fake init, real init in init_weights()
         # Value embeddings (ResFormer-style): alternating layers, last layer always included
+        # For linear layers (full MHA), kv_dim = n_head * head_dim = n_embd
+        # For dense/sparse layers, kv_dim = n_kv_head * head_dim (may be smaller with GQA)
         head_dim = config.n_embd // config.n_head
-        kv_dim = config.n_kv_head * head_dim
-        self.value_embeds = nn.ModuleDict({str(i): nn.Embedding(padded_vocab_size, kv_dim) for i in range(config.n_layer) if has_ve(i, config.n_layer)})
+        ve_dims = {}
+        for i in range(config.n_layer):
+            if has_ve(i, config.n_layer):
+                if self.attn_types[i] == "linear":
+                    ve_dims[str(i)] = config.n_head * head_dim  # full MHA
+                else:
+                    kv_heads = config.n_kv_head_sparse if config.n_kv_head_sparse > 0 else config.n_kv_head
+                    ve_dims[str(i)] = kv_heads * head_dim
+        self.value_embeds = nn.ModuleDict({k: nn.Embedding(padded_vocab_size, dim) for k, dim in ve_dims.items()})
         # To support meta device initialization, we init the rotary embeddings here, but it's just "fake" meta tensors only.
         # As for rotary_seq_len, these rotary embeddings are pretty small/cheap in memory,
         # so let's just over-compute them by 10X, but assert fail if we ever reach that amount.
@@ -194,13 +257,24 @@ class GPT(nn.Module):
         wte (embedding):     normal, std=1.0
         lm_head:             normal, std=0.001
         for each block:
+          CausalSelfAttention (dense/sparse layers):
             attn.c_q:        uniform, std=1/sqrt(n_embd)
             attn.c_k:        uniform, std=1/sqrt(n_embd)
             attn.c_v:        uniform, std=1/sqrt(n_embd)
             attn.c_proj:     zeros
+            attn.o_gate:     zeros (if present)
+          LightningAttention (linear layers):
+            attn.c_q:        uniform, std=1/sqrt(n_embd)
+            attn.c_k:        uniform, std=1/sqrt(n_embd)
+            attn.c_v:        uniform, std=1/sqrt(n_embd)
+            attn.c_proj:     zeros
+            attn.z_proj:     zeros (if present)
+            attn.q_norm/k_norm/o_norm: ones (standard RMSNorm init, handled by nn.RMSNorm default)
+          MLP:
             mlp.c_fc:        uniform, std=1/sqrt(n_embd)
             mlp.c_proj:      zeros
         """
+        from nanochat.linear_attention import LightningAttention
 
         # Embedding and unembedding
         torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=1.0)
@@ -210,10 +284,17 @@ class GPT(nn.Module):
         n_embd = self.config.n_embd
         s = 3**0.5 * n_embd**-0.5 # sqrt(3) multiplier makes sure Uniform achieves the same std as Normal
         for block in self.transformer.h:
-            torch.nn.init.uniform_(block.attn.c_q.weight, -s, s) # weights use Uniform to avoid outliers
-            torch.nn.init.uniform_(block.attn.c_k.weight, -s, s)
-            torch.nn.init.uniform_(block.attn.c_v.weight, -s, s)
-            torch.nn.init.zeros_(block.attn.c_proj.weight) # projections are zero
+            attn = block.attn
+            torch.nn.init.uniform_(attn.c_q.weight, -s, s)
+            torch.nn.init.uniform_(attn.c_k.weight, -s, s)
+            torch.nn.init.uniform_(attn.c_v.weight, -s, s)
+            torch.nn.init.zeros_(attn.c_proj.weight)
+            # Output gates (o_gate for dense, z_proj for linear): init to zero
+            if hasattr(attn, 'o_gate') and attn.o_gate is not None:
+                torch.nn.init.zeros_(attn.o_gate.weight)
+            if hasattr(attn, 'z_proj') and attn.z_proj is not None:
+                torch.nn.init.zeros_(attn.z_proj.weight)
+            # MLP
             torch.nn.init.uniform_(block.mlp.c_fc.weight, -s, s)
             torch.nn.init.zeros_(block.mlp.c_proj.weight)
 
@@ -235,14 +316,23 @@ class GPT(nn.Module):
         cos, sin = self._precompute_rotary_embeddings(self.rotary_seq_len, head_dim)
         self.cos, self.sin = cos, sin
 
+        # Recompute non-persistent buffers for LightningAttention layers (ALiBi decay slopes)
+        from nanochat.linear_attention import LightningAttention, _build_slope_tensor
+        for block in self.transformer.h:
+            if isinstance(block.attn, LightningAttention):
+                device = block.attn.c_q.weight.device
+                slopes = _build_slope_tensor(block.attn.n_head).to(device)
+                block.attn.g_gamma = torch.log(slopes)
+
         # Cast embeddings to bf16: optimizer can tolerate it and it saves memory
         if self.transformer.wte.weight.device.type == "cuda":
             self.transformer.wte.to(dtype=torch.bfloat16)
             for ve in self.value_embeds.values():
                 ve.to(dtype=torch.bfloat16)
 
-    def _precompute_rotary_embeddings(self, seq_len, head_dim, base=10000, device=None):
-        # TODO: bump base theta more? e.g. 100K is more common more recently
+    def _precompute_rotary_embeddings(self, seq_len, head_dim, base=None, device=None):
+        if base is None:
+            base = self.config.rope_theta
         # autodetect the device from model embeddings
         if device is None:
             device = self.transformer.wte.weight.device
@@ -295,12 +385,10 @@ class GPT(nn.Module):
         Return the estimated FLOPs per token for the model (forward + backward).
         Each matmul weight parameter contributes 2 FLOPs (multiply *, accumulate +) in forward, and 2X that in backward => 2+4=6.
         Cleanest explanation of this: https://medium.com/@dzmitrybahdanau/the-flops-calculus-of-language-model-training-3b19c1f025e4
-        On top of that, 12 * h * q * effective_seq_len accounts for key @ query matmul flops inside attention.
-        With sliding windows, effective_seq_len varies per layer (capped by window size).
+        On top of that, attention FLOPs vary per layer type:
+        - Dense/sparse layers: 12 * h * q * effective_seq_len (softmax attention)
+        - Linear layers: 2 * T * n_head * head_dim^2 (recurrent state update, no quadratic attention)
         Ref: https://arxiv.org/abs/2204.02311 (PaLM paper).
-        This is ~1% off from the exact formulas of Chinchilla paper, the difference is:
-        - Chinchilla counts the embedding layer as flops (? weird, it's just a lookup => we ignore)
-        - Chinchilla counts exp/sum/divide in attention softmax as flops (a little sus and very tiny => we ignore)
         """
         nparams = sum(p.numel() for p in self.parameters())
         # Exclude non-matmul params: embeddings and per-layer scalars
@@ -308,12 +396,16 @@ class GPT(nn.Module):
         nparams_exclude = (self.transformer.wte.weight.numel() + value_embeds_numel +
                           self.resid_lambdas.numel() + self.x0_lambdas.numel())
         h, q, t = self.config.n_head, self.config.n_embd // self.config.n_head, self.config.sequence_len
-        # Sum attention FLOPs per layer, accounting for sliding window
+        # Sum attention FLOPs per layer, accounting for layer type and sliding window
         attn_flops = 0
-        for window_size in self.window_sizes:
-            window = window_size[0]  # (left, right) tuple, we use left
-            effective_seq = t if window < 0 else min(window, t)
-            attn_flops += 12 * h * q * effective_seq
+        for i, window_size in enumerate(self.window_sizes):
+            if self.attn_types[i] == "linear":
+                # Linear attention: state update is O(T * n_head * head_dim^2), no quadratic attention
+                attn_flops += 6 * t * h * q * q  # 6x for fwd+bwd of the state matmul
+            else:
+                window = window_size[0]  # (left, right) tuple, we use left
+                effective_seq = t if window < 0 else min(window, t)
+                attn_flops += 12 * h * q * effective_seq
         num_flops_per_token = 6 * (nparams - nparams_exclude) + attn_flops
         return num_flops_per_token
 
@@ -333,14 +425,22 @@ class GPT(nn.Module):
         model_dim = self.config.n_embd
         ddp, rank, local_rank, world_size = get_dist_info()
         # Separate out all parameters into groups
-        matrix_params = list(self.transformer.h.parameters())
+        # Muon requires strictly 2D parameters, so we split transformer.h params into 2D (Muon) and non-2D (AdamW)
+        matrix_params = []       # 2D weight matrices -> Muon
+        attn_scalar_params = []  # 1D params from attention (norms, etc.) -> AdamW
+        for p in self.transformer.h.parameters():
+            if p.ndim == 2:
+                matrix_params.append(p)
+            else:
+                attn_scalar_params.append(p)
         value_embeds_params = list(self.value_embeds.parameters())
         embedding_params = list(self.transformer.wte.parameters())
         lm_head_params = list(self.lm_head.parameters())
         resid_params = [self.resid_lambdas]
         x0_params = [self.x0_lambdas]
-        assert len(list(self.parameters())) == len(matrix_params) + len(embedding_params) + len(lm_head_params) + len(value_embeds_params) + len(resid_params) + len(x0_params)
-        # Create the AdamW optimizer for the embedding, lm_head, and per-layer scalars
+        all_params = len(matrix_params) + len(attn_scalar_params) + len(embedding_params) + len(lm_head_params) + len(value_embeds_params) + len(resid_params) + len(x0_params)
+        assert len(list(self.parameters())) == all_params, f"Parameter count mismatch: {len(list(self.parameters()))} != {all_params}"
+        # Create the AdamW optimizer for the embedding, lm_head, per-layer scalars, and 1D attention params
         # Scale the LR for the AdamW parameters by ∝1/√dmodel (having tuned the LRs for 768 dim model)
         dmodel_lr_scale = (model_dim / 768) ** -0.5
         print0(f"Scaling the LR for the AdamW parameters ∝1/√({model_dim}/768) = {dmodel_lr_scale:.6f}")
@@ -351,10 +451,13 @@ class GPT(nn.Module):
             dict(params=resid_params, lr=scalar_lr * 0.01), # these are a lot more sensitive because they accumulate in the residual stream
             dict(params=x0_params, lr=scalar_lr),
         ]
+        # Add 1D attention params (norms, gates) to AdamW if any exist (SALA linear layers have these)
+        if attn_scalar_params:
+            adam_groups.append(dict(params=attn_scalar_params, lr=scalar_lr))
         adamw_kwargs = dict(betas=adam_betas, eps=1e-10, weight_decay=0.0) # NOTE: weight decay is hardcoded to 0.0 for AdamW, only used in Muon
         AdamWFactory = DistAdamW if ddp else partial(torch.optim.AdamW, fused=True)
         adamw_optimizer = AdamWFactory(adam_groups, **adamw_kwargs)
-        # Create the Muon optimizer for the linear layers
+        # Create the Muon optimizer for the 2D linear layers
         muon_kwargs = dict(lr=matrix_lr, momentum=0.95, weight_decay=weight_decay)
         MuonFactory = DistMuon if ddp else Muon
         muon_optimizer = MuonFactory(matrix_params, **muon_kwargs)
@@ -383,7 +486,16 @@ class GPT(nn.Module):
         for i, block in enumerate(self.transformer.h):
             x = self.resid_lambdas[i] * x + self.x0_lambdas[i] * x0
             ve = self.value_embeds[str(i)](idx) if str(i) in self.value_embeds else None
-            x = block(x, ve, cos_sin, self.window_sizes[i], kv_cache)
+            if self.config.use_gradient_checkpointing and self.training:
+                x = torch.utils.checkpoint.checkpoint(
+                    block, x, ve, cos_sin, self.window_sizes[i], kv_cache,
+                    use_reentrant=False,
+                )
+            else:
+                x = block(x, ve, cos_sin, self.window_sizes[i], kv_cache)
+        # Advance KV cache position after all layers have processed (inference only)
+        if kv_cache is not None:
+            kv_cache.advance(T)
         x = norm(x)
 
         # Forward the lm_head (compute logits)

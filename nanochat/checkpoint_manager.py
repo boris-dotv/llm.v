@@ -36,6 +36,28 @@ def _patch_missing_config_keys(model_config_kwargs):
     if "window_pattern" not in model_config_kwargs:
         model_config_kwargs["window_pattern"] = "L"
         log0(f"Patching missing window_pattern in model config to 'L'")
+    # SALA hybrid attention fields
+    if "attn_types" not in model_config_kwargs:
+        model_config_kwargs["attn_types"] = None
+    if "n_kv_head_sparse" not in model_config_kwargs:
+        model_config_kwargs["n_kv_head_sparse"] = -1
+    if "use_output_gate" not in model_config_kwargs:
+        model_config_kwargs["use_output_gate"] = False
+    if "use_hype" not in model_config_kwargs:
+        model_config_kwargs["use_hype"] = False
+    if "rope_theta" not in model_config_kwargs:
+        model_config_kwargs["rope_theta"] = 10000.0
+    if "use_gradient_checkpointing" not in model_config_kwargs:
+        model_config_kwargs["use_gradient_checkpointing"] = False
+    # Sparse attention config defaults
+    for key, default in [
+        ("sparse_block_size", 64), ("sparse_kernel_size", 32),
+        ("sparse_kernel_stride", 16), ("sparse_topk", 63),
+        ("sparse_init_blocks", 1), ("sparse_local_blocks", 32),
+        ("sparse_dense_len", 8192),
+    ]:
+        if key not in model_config_kwargs:
+            model_config_kwargs[key] = default
 
 def _patch_missing_keys(model_data, model_config):
     """Add default values for new parameters that may be missing in old checkpoints."""
@@ -174,6 +196,9 @@ def load_model_from_dir(checkpoints_dir, device, phase, model_tag=None, step=Non
 def load_model(source, *args, **kwargs):
     model_dir = {
         "base": "base_checkpoints",
+        "halo": "halo_checkpoints",
+        "continual": "cont_checkpoints",
+        "longctx": "longctx_checkpoints",
         "mid": "mid_checkpoints",
         "sft": "chatsft_checkpoints",
         "rl": "chatrl_checkpoints",
