@@ -87,52 +87,52 @@ nanochat now supports training SALA-style hybrid models that combine **sparse at
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        SALA Hybrid Model (d32, ~2.2B)              │
+│                        SALA Hybrid Model (d32, ~2.2B)               │
 │                                                                     │
-│  Input Tokens ──► [Embedding] ──► RMSNorm ──► x₀                  │
+│  Input Tokens ──► [Embedding] ──► RMSNorm ──► x₀                    │
 │                                                                     │
 │  For each layer i = 0..31:                                          │
-│    x = λ_resid[i] * x + λ_x0[i] * x₀    (per-layer residual)     │
+│    x = λ_resid[i] * x + λ_x0[i] * x₀    (per-layer residual)        │
 │                                                                     │
 │    ┌─── Layer Type? ───────────────────────────────────────────┐    │
 │    │                                                           │    │
 │    │  "dense" (Sparse)              "linear" (Lightning)       │    │
-│    │  Layers: 0,9,16,17,            Layers: 1-8,10-15,        │    │
+│    │  Layers: 0,9,16,17,            Layers: 1-8,10-15,         │    │
 │    │          22,29,30,31                   18-21,23-28        │    │
 │    │  (8 layers, 25%)               (24 layers, 75%)           │    │
 │    │                                                           │    │
-│    │  ┌─────────────────┐           ┌─────────────────┐       │    │
-│    │  │ CausalSelfAttn  │           │ LightningAttn   │       │    │
-│    │  │                 │           │                 │       │    │
-│    │  │ Q: n_embd→16*128│           │ Q: n_embd→16*128│       │    │
-│    │  │ K: n_embd→ 2*128│ ◄─ GQA   │ K: n_embd→16*128│ ◄─MHA│    │
-│    │  │ V: n_embd→ 2*128│           │ V: n_embd→16*128│       │    │
-│    │  │                 │           │                 │       │    │
-│    │  │ + Value Embed   │           │ + Value Embed   │       │    │
-│    │  │ + NoPE (no RoPE)│ ◄─ HyPE  │ + RoPE          │ ◄─HyPE│   │
-│    │  │ + QK Norm       │           │ + QK Norm (learn)│      │    │
-│    │  │                 │           │                 │       │    │
-│    │  │ ┌─────────────┐ │           │ ┌─────────────┐ │       │    │
-│    │  │ │ FlashAttn   │ │           │ │ SimpleGLA   │ │       │    │
-│    │  │ │ + sliding   │ │           │ │ (chunk mode │ │       │    │
-│    │  │ │   window    │ │           │ │  for train, │ │       │    │
-│    │  │ │ OR InfLLMv2 │ │           │ │  recurrent  │ │       │    │
-│    │  │ │   top-k     │ │           │ │  for infer) │ │       │    │
-│    │  │ │   sparse    │ │           │ │ + ALiBi     │ │       │    │
-│    │  │ └─────────────┘ │           │ │   decay     │ │       │    │
-│    │  │                 │           │ └─────────────┘ │       │    │
-│    │  │ + o_gate (σ)    │           │ + o_norm        │       │    │
-│    │  │ + O projection  │           │ + z_proj (σ)    │       │    │
-│    │  └─────────────────┘           │ + O projection  │       │    │
-│    │                                └─────────────────┘       │    │
+│    │  ┌─────────────────┐           ┌─────────────────┐        │    │
+│    │  │ CausalSelfAttn  │           │ LightningAttn   │        │    │
+│    │  │                 │           │                 │        │    │
+│    │  │ Q: n_embd→16*128│           │ Q: n_embd→16*128│        │    │
+│    │  │ K: n_embd→ 2*128│ ◄─ GQA    │ K: n_embd→16*128│   ◄─MHA│    │
+│    │  │ V: n_embd→ 2*128│           │ V: n_embd→16*128│        │    │
+│    │  │                 │           │                 │        │    │
+│    │  │ + Value Embed   │           │ + Value Embed   │        │    │
+│    │  │ + NoPE (no RoPE)│ ◄─ HyPE   │ + RoPE          │  ◄─HyPE│    │
+│    │  │ + QK Norm       │           │ + QK Norm (learn)│       │    │
+│    │  │                 │           │                 │        │    │
+│    │  │ ┌─────────────┐ │           │ ┌─────────────┐ │        │    │
+│    │  │ │ FlashAttn   │ │           │ │ SimpleGLA   │ │        │    │
+│    │  │ │ + sliding   │ │           │ │ (chunk mode │ │        │    │
+│    │  │ │   window    │ │           │ │  for train, │ │        │    │
+│    │  │ │ OR InfLLMv2 │ │           │ │  recurrent  │ │        │    │
+│    │  │ │   top-k     │ │           │ │  for infer) │ │        │    │
+│    │  │ │   sparse    │ │           │ │ + ALiBi     │ │        │    │
+│    │  │ └─────────────┘ │           │ │   decay     │ │        │    │
+│    │  │                 │           │ └─────────────┘ │        │    │
+│    │  │ + o_gate (σ)    │           │ + o_norm        │        │    │
+│    │  │ + O projection  │           │ + z_proj (σ)    │        │    │
+│    │  └─────────────────┘           │ + O projection  │        │    │
+│    │                                └─────────────────┘        │    │
 │    └───────────────────────────────────────────────────────────┘    │
 │                                                                     │
-│    x = x + Attn(RMSNorm(x))          (pre-norm residual)           │
-│    x = x + MLP(RMSNorm(x))           (relu² activation, 4x expand)│
+│    x = x + Attn(RMSNorm(x))          (pre-norm residual)            │
+│    x = x + MLP(RMSNorm(x))           (relu² activation, 4x expand)  │
 │                                                                     │
 │  End for                                                            │
 │                                                                     │
-│  x ──► RMSNorm ──► lm_head ──► softcap(15) ──► logits             │
+│  x ──► RMSNorm ──► lm_head ──► softcap(15) ──► logits               │
 └─────────────────────────────────────────────────────────────────────┘
 
 Layer Layout (S = Sparse/Dense, L = Linear/Lightning):
