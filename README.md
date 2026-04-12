@@ -85,22 +85,96 @@ nanochat now supports training SALA-style hybrid models that combine **sparse at
 
 ### Architecture
 
-- **Sparse layers** (8 of 32): Standard softmax attention with InfLLM-V2 top-k block selection for long sequences. Use GQA (2 KV heads) and NoPE (no positional encoding) for long-range recall.
-- **Linear layers** (24 of 32): SimpleGLA with ALiBi-style decay. O(n) compute and constant-size recurrent state. Full MHA (16 KV heads) with RoPE.
-- **HyPE** (Hybrid Positional Encoding): RoPE on linear layers, NoPE on sparse layers.
-- **Output gates**: Sigmoid gating on both layer types for training stability.
-- **Gradient checkpointing**: For memory-efficient long-context training.
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SALA Hybrid Model (d32, ~2.2B)              │
+│                                                                     │
+│  Input Tokens ──► [Embedding] ──► RMSNorm ──► x₀                  │
+│                                                                     │
+│  For each layer i = 0..31:                                          │
+│    x = λ_resid[i] * x + λ_x0[i] * x₀    (per-layer residual)     │
+│                                                                     │
+│    ┌─── Layer Type? ───────────────────────────────────────────┐    │
+│    │                                                           │    │
+│    │  "dense" (Sparse)              "linear" (Lightning)       │    │
+│    │  Layers: 0,9,16,17,            Layers: 1-8,10-15,        │    │
+│    │          22,29,30,31                   18-21,23-28        │    │
+│    │  (8 layers, 25%)               (24 layers, 75%)           │    │
+│    │                                                           │    │
+│    │  ┌─────────────────┐           ┌─────────────────┐       │    │
+│    │  │ CausalSelfAttn  │           │ LightningAttn   │       │    │
+│    │  │                 │           │                 │       │    │
+│    │  │ Q: n_embd→16*128│           │ Q: n_embd→16*128│       │    │
+│    │  │ K: n_embd→ 2*128│ ◄─ GQA   │ K: n_embd→16*128│ ◄─MHA│    │
+│    │  │ V: n_embd→ 2*128│           │ V: n_embd→16*128│       │    │
+│    │  │                 │           │                 │       │    │
+│    │  │ + Value Embed   │           │ + Value Embed   │       │    │
+│    │  │ + NoPE (no RoPE)│ ◄─ HyPE  │ + RoPE          │ ◄─HyPE│   │
+│    │  │ + QK Norm       │           │ + QK Norm (learn)│      │    │
+│    │  │                 │           │                 │       │    │
+│    │  │ ┌─────────────┐ │           │ ┌─────────────┐ │       │    │
+│    │  │ │ FlashAttn   │ │           │ │ SimpleGLA   │ │       │    │
+│    │  │ │ + sliding   │ │           │ │ (chunk mode │ │       │    │
+│    │  │ │   window    │ │           │ │  for train, │ │       │    │
+│    │  │ │ OR InfLLMv2 │ │           │ │  recurrent  │ │       │    │
+│    │  │ │   top-k     │ │           │ │  for infer) │ │       │    │
+│    │  │ │   sparse    │ │           │ │ + ALiBi     │ │       │    │
+│    │  │ └─────────────┘ │           │ │   decay     │ │       │    │
+│    │  │                 │           │ └─────────────┘ │       │    │
+│    │  │ + o_gate (σ)    │           │ + o_norm        │       │    │
+│    │  │ + O projection  │           │ + z_proj (σ)    │       │    │
+│    │  └─────────────────┘           │ + O projection  │       │    │
+│    │                                └─────────────────┘       │    │
+│    └───────────────────────────────────────────────────────────┘    │
+│                                                                     │
+│    x = x + Attn(RMSNorm(x))          (pre-norm residual)           │
+│    x = x + MLP(RMSNorm(x))           (relu² activation, 4x expand)│
+│                                                                     │
+│  End for                                                            │
+│                                                                     │
+│  x ──► RMSNorm ──► lm_head ──► softcap(15) ──► logits             │
+└─────────────────────────────────────────────────────────────────────┘
 
-### Training Pipeline
+Layer Layout (S = Sparse/Dense, L = Linear/Lightning):
 
-The SALA model follows a **dense-first, then convert** paradigm from the [MiniCPM-SALA paper](https://huggingface.co/openbmb/MiniCPM-SALA):
+  Layer  0: S    Layer  1: L    Layer  2: L    Layer  3: L
+  Layer  4: L    Layer  5: L    Layer  6: L    Layer  7: L
+  Layer  8: L    Layer  9: S    Layer 10: L    Layer 11: L
+  Layer 12: L    Layer 13: L    Layer 14: L    Layer 15: L
+  Layer 16: S    Layer 17: S    Layer 18: L    Layer 19: L
+  Layer 20: L    Layer 21: L    Layer 22: S    Layer 23: L
+  Layer 24: L    Layer 25: L    Layer 26: L    Layer 27: L
+  Layer 28: L    Layer 29: S    Layer 30: S    Layer 31: S
+
+  Sparse layers anchor the beginning (0), middle (9,16-17,22),
+  and end (29-31) — full softmax for precise attention.
+  Linear layers handle the bulk with O(n) efficiency.
+
+Inference Memory:
+  Sparse layers: KV cache grows with context    ──► O(n) memory
+  Linear layers: fixed recurrent state (H×D×D)  ──► O(1) memory
+  Total at 128K: ~1 GB KV (8 sparse) + ~10 MB state (24 linear)
+
+Training Complexity:
+  Sparse layers: O(n²) softmax  OR  O(n·k) with InfLLM-V2 sparse
+  Linear layers: O(n) chunk-parallel SimpleGLA
+```
+
+Training pipeline:
 
 ```
-Stage 1: Dense pretrain (d32, ~2B params, 4K context, ~40B tokens)
-Stage 2: HALO conversion (convert 75% layers to linear attention, ~1.3B tokens at 512 context)
-Stage 3: Continual stable-training (all params, sparse disabled, 4K context, ~30B tokens)
-Stage 4: Long-context adaptation (sparse enabled, 32K → 64K → 128K, ~20B tokens)
-Stage 5: SFT + downstream (existing pipeline)
+ ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌─────┐
+ │  Stage 1 │    │ Stage 2  │    │ Stage 3  │    │   Stage 4    │    │  5  │
+ │  Dense   │───►│  HALO    │───►│ Continual│───►│  Long-Ctx    │───►│ SFT │
+ │ Pretrain │    │ Convert  │    │ Stable   │    │ Adaptation   │    │     │
+ │          │    │          │    │          │    │              │    │     │
+ │ d32 GPT  │    │ 75% → LA │    │ All param│    │ 32K→64K→128K │    │ Mid │
+ │ 4K ctx   │    │ 512 ctx  │    │ 4K ctx   │    │ Sparse ON    │    │ +   │
+ │ ~40B tok │    │ 1.3B tok │    │ ~30B tok │    │ ~20B tok     │    │ SFT │
+ │ ~31h     │    │ <1h      │    │ ~24-48h  │    │ ~40-80h      │    │     │
+ └──────────┘    └──────────┘    └──────────┘    └──────────────┘    └─────┘
+  Full dense      Freeze all     Unfreeze all    Enable InfLLMv2    Existing
+  attention       except LA      disable_sparse  + grad checkpoint  pipeline
 ```
 
 Run end-to-end:
