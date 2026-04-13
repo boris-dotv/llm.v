@@ -46,6 +46,7 @@ torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cu128", extra = "gpu" },
 ]
+fla = { git = "https://github.com/sustcsonglin/flash-linear-attention" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
