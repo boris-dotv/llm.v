@@ -21,7 +21,7 @@ import wandb
 import torch
 
 from nanochat.gpt import GPT, GPTConfig
-from nanochat.dataloader import tokenizing_distributed_data_loader_bos_bestfit, tokenizing_distributed_data_loader_with_state_bos_bestfit
+from nanochat.dataloader import tokenizing_distributed_data_loader_bos_bestfit, tokenizing_distributed_data_loader_with_state_bos_bestfit, mixed_tokenizing_distributed_data_loader_bos_bestfit
 from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, print_banner, get_base_dir, autodetect_device_type, get_peak_flops
 from nanochat.tokenizer import get_tokenizer, get_token_bytes
 from nanochat.checkpoint_manager import save_checkpoint, load_checkpoint
@@ -71,6 +71,11 @@ parser.add_argument("--sample-every", type=int, default=2000, help="sample from 
 parser.add_argument("--save-every", type=int, default=-1, help="save checkpoints every N steps (-1 = only at end)")
 # Output
 parser.add_argument("--model-tag", type=str, default=None, help="override model tag for checkpoint directory name")
+# Code data (for code-specialized training)
+parser.add_argument("--code-data-dir", type=str, default=None, help="path to code data parquets (enables code+text mixed training)")
+parser.add_argument("--code-weight", type=float, default=0.7, help="fraction of tokens from code corpus (default: 0.7)")
+parser.add_argument("--fim-rate", type=float, default=0.5, help="fraction of code docs to apply FIM transform (default: 0.5)")
+parser.add_argument("--spm-rate", type=float, default=0.5, help="fraction of FIM docs using SPM format vs PSM (default: 0.5)")
 args = parser.parse_args()
 user_config = vars(args).copy()  # for logging
 # -----------------------------------------------------------------------------
@@ -226,7 +231,25 @@ if resuming:
 # -----------------------------------------------------------------------------
 # Initialize the DataLoaders for train/val
 dataloader_resume_state_dict = None if not resuming else meta_data["dataloader_state_dict"]
-train_loader = tokenizing_distributed_data_loader_with_state_bos_bestfit(tokenizer, args.device_batch_size, args.max_seq_len, split="train", device=device, resume_state_dict=dataloader_resume_state_dict)
+
+if args.code_data_dir:
+    from nanochat.fim import make_fim_transform
+    from nanochat.dataset import DATA_DIR
+    fim_fn = make_fim_transform(tokenizer, fim_rate=args.fim_rate, spm_rate=args.spm_rate)
+    data_sources = [
+        (args.code_data_dir, args.code_weight, fim_fn),
+        (DATA_DIR, 1.0 - args.code_weight, None),
+    ]
+    print0(f"Mixed data: {args.code_weight:.0%} code (FIM rate={args.fim_rate}) + {1-args.code_weight:.0%} text")
+    train_loader = mixed_tokenizing_distributed_data_loader_bos_bestfit(
+        tokenizer, args.device_batch_size, args.max_seq_len, split="train",
+        data_sources=data_sources, device=device, resume_state_dict=dataloader_resume_state_dict,
+    )
+else:
+    train_loader = tokenizing_distributed_data_loader_with_state_bos_bestfit(
+        tokenizer, args.device_batch_size, args.max_seq_len, split="train",
+        device=device, resume_state_dict=dataloader_resume_state_dict,
+    )
 build_val_loader = lambda: tokenizing_distributed_data_loader_bos_bestfit(tokenizer, args.device_batch_size, args.max_seq_len, split="val", device=device)
 x, y, dataloader_state_dict = next(train_loader) # kick off load of the very first batch of data
 

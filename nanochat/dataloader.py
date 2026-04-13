@@ -27,7 +27,7 @@ import pyarrow.parquet as pq
 from nanochat.common import get_dist_info
 from nanochat.dataset import list_parquet_files
 
-def _document_batches(split, resume_state_dict, tokenizer_batch_size):
+def _document_batches(split, resume_state_dict, tokenizer_batch_size, data_dir=None):
     """
     Infinite iterator over document batches (list of text strings) from parquet files.
 
@@ -37,8 +37,8 @@ def _document_batches(split, resume_state_dict, tokenizer_batch_size):
     """
     ddp, ddp_rank, ddp_local_rank, ddp_world_size = get_dist_info()
 
-    parquet_paths = list_parquet_files()
-    assert len(parquet_paths) != 0, "No dataset parquet files found, did you run dataset.py?"
+    parquet_paths = list_parquet_files(data_dir=data_dir)
+    assert len(parquet_paths) != 0, f"No dataset parquet files found in {data_dir}, did you run dataset.py?"
     parquet_paths = parquet_paths[:-1] if split == "train" else parquet_paths[-1:]
 
     resume_pq_idx = resume_state_dict["pq_idx"] if resume_state_dict is not None else 0
@@ -121,7 +121,9 @@ def tokenizing_distributed_data_loader_with_state_bos_bestfit(
     tokenizer, B, T, split,
     tokenizer_threads=4, tokenizer_batch_size=128,
     device="cuda", resume_state_dict=None,
-    buffer_size=1000
+    buffer_size=1000,
+    fim_transform_fn=None,
+    data_dir=None,
 ):
     """
     BOS-aligned dataloader with Best-Fit Cropping.
@@ -142,7 +144,7 @@ def tokenizing_distributed_data_loader_with_state_bos_bestfit(
     assert split in ["train", "val"], "split must be 'train' or 'val'"
 
     row_capacity = T + 1
-    batches = _document_batches(split, resume_state_dict, tokenizer_batch_size)
+    batches = _document_batches(split, resume_state_dict, tokenizer_batch_size, data_dir=data_dir)
     bos_token = tokenizer.get_bos_token_id()
     doc_buffer = []
     pq_idx, rg_idx, epoch = 0, 0, 1
@@ -152,6 +154,8 @@ def tokenizing_distributed_data_loader_with_state_bos_bestfit(
         doc_batch, (pq_idx, rg_idx, epoch) = next(batches)
         token_lists = tokenizer.encode(doc_batch, prepend=bos_token, num_threads=tokenizer_threads)
         for tokens in token_lists:
+            if fim_transform_fn is not None:
+                tokens = fim_transform_fn(tokens)
             doc_buffer.append(tokens)
 
     while True:
@@ -197,3 +201,108 @@ def tokenizing_distributed_data_loader_bos_bestfit(*args, **kwargs):
     """Helper that omits state_dict from yields."""
     for inputs, targets, state_dict in tokenizing_distributed_data_loader_with_state_bos_bestfit(*args, **kwargs):
         yield inputs, targets
+
+
+def _mixed_document_batches(split, resume_state_dict, tokenizer_batch_size, data_sources):
+    """
+    Interleave document batches from multiple parquet directories with weights.
+    data_sources: list of (data_dir, weight) tuples.
+    Yields (text_batch, (pq_idx, rg_idx, epoch)) using weighted round-robin.
+    """
+    import random as _random
+    rng = _random.Random(42)
+    iterators = []
+    weights = []
+    for data_dir, weight in data_sources:
+        it = _document_batches(split, resume_state_dict, tokenizer_batch_size, data_dir=data_dir)
+        iterators.append(it)
+        weights.append(weight)
+    # normalize weights
+    total = sum(weights)
+    cum_weights = [w / total for w in weights]
+    while True:
+        # weighted random choice
+        idx = rng.choices(range(len(iterators)), weights=cum_weights, k=1)[0]
+        yield next(iterators[idx])
+
+
+def mixed_tokenizing_distributed_data_loader_bos_bestfit(
+    tokenizer, B, T, split,
+    data_sources,
+    tokenizer_threads=4, tokenizer_batch_size=128,
+    device="cuda", resume_state_dict=None,
+    buffer_size=1000,
+):
+    """
+    BOS-aligned bestfit packing from mixed data sources.
+
+    data_sources: list of (data_dir, weight, fim_transform_fn_or_None) tuples.
+    Each source contributes documents in proportion to its weight.
+    FIM transform is applied per-source (only code sources get FIM).
+    """
+    assert split in ["train", "val"], "split must be 'train' or 'val'"
+
+    import random as _random
+    rng = _random.Random(42)
+
+    row_capacity = T + 1
+    bos_token = tokenizer.get_bos_token_id()
+    doc_buffer = []
+    pq_idx, rg_idx, epoch = 0, 0, 1
+
+    # set up per-source iterators
+    source_iterators = []
+    source_weights = []
+    source_fim_fns = []
+    for data_dir, weight, fim_fn in data_sources:
+        it = _document_batches(split, resume_state_dict, tokenizer_batch_size, data_dir=data_dir)
+        source_iterators.append(it)
+        source_weights.append(weight)
+        source_fim_fns.append(fim_fn)
+
+    def refill_buffer():
+        nonlocal pq_idx, rg_idx, epoch
+        # weighted random source selection
+        idx = rng.choices(range(len(source_iterators)), weights=source_weights, k=1)[0]
+        doc_batch, (pq_idx, rg_idx, epoch) = next(source_iterators[idx])
+        token_lists = tokenizer.encode(doc_batch, prepend=bos_token, num_threads=tokenizer_threads)
+        fim_fn = source_fim_fns[idx]
+        for tokens in token_lists:
+            if fim_fn is not None:
+                tokens = fim_fn(tokens)
+            doc_buffer.append(tokens)
+
+    while True:
+        rows = []
+        for _ in range(B):
+            row = []
+            while len(row) < row_capacity:
+                while len(doc_buffer) < buffer_size:
+                    refill_buffer()
+
+                remaining = row_capacity - len(row)
+
+                best_idx = -1
+                best_len = 0
+                for i, doc in enumerate(doc_buffer):
+                    doc_len = len(doc)
+                    if doc_len <= remaining and doc_len > best_len:
+                        best_idx = i
+                        best_len = doc_len
+
+                if best_idx >= 0:
+                    doc = doc_buffer.pop(best_idx)
+                    row.extend(doc)
+                else:
+                    shortest_idx = min(range(len(doc_buffer)), key=lambda i: len(doc_buffer[i]))
+                    doc = doc_buffer.pop(shortest_idx)
+                    row.extend(doc[:remaining])
+
+            rows.append(row[:row_capacity])
+
+        use_cuda = device == "cuda"
+        batch_tensor = torch.tensor(rows, dtype=torch.long, pin_memory=use_cuda)
+        inputs = batch_tensor[:, :-1].to(device=device, non_blocking=use_cuda)
+        targets = batch_tensor[:, 1:].to(device=device, non_blocking=use_cuda)
+
+        yield inputs, targets, {"pq_idx": pq_idx, "rg_idx": rg_idx, "epoch": epoch}

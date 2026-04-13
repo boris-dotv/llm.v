@@ -19,7 +19,7 @@ import time
 import torch
 
 from nanochat.gpt import GPT, GPTConfig
-from nanochat.dataloader import tokenizing_distributed_data_loader_bos_bestfit
+from nanochat.dataloader import tokenizing_distributed_data_loader_bos_bestfit, mixed_tokenizing_distributed_data_loader_bos_bestfit
 from nanochat.common import compute_init, compute_cleanup, print0, DummyWandb, print_banner, get_base_dir, autodetect_device_type
 from nanochat.tokenizer import get_tokenizer
 from nanochat.checkpoint_manager import save_checkpoint, load_model
@@ -49,6 +49,11 @@ parser.add_argument("--final-lr-frac", type=float, default=0.5, help="Final LR a
 parser.add_argument("--eval-every", type=int, default=100)
 parser.add_argument("--save-every", type=int, default=500)
 parser.add_argument("--run", type=str, default="dummy")
+# Code data (for code-specialized training)
+parser.add_argument("--code-data-dir", type=str, default=None, help="path to code data parquets")
+parser.add_argument("--code-weight", type=float, default=0.7, help="fraction of tokens from code corpus")
+parser.add_argument("--fim-rate", type=float, default=0.5, help="fraction of code docs to apply FIM")
+parser.add_argument("--spm-rate", type=float, default=0.5, help="fraction of FIM docs using SPM format")
 args = parser.parse_args()
 
 # ---- Setup ----
@@ -111,9 +116,23 @@ print0(f"Total iterations: {num_iterations:,}")
 print0(f"Total tokens: {num_iterations * args.total_batch_size:,}")
 
 # ---- Data ----
-train_loader = tokenizing_distributed_data_loader_bos_bestfit(
-    "train", tokenizer, args.device_batch_size, args.max_seq_len, ddp_rank, ddp_world_size, device
-)
+if args.code_data_dir:
+    from nanochat.fim import make_fim_transform
+    from nanochat.dataset import DATA_DIR
+    fim_fn = make_fim_transform(tokenizer, fim_rate=args.fim_rate, spm_rate=args.spm_rate)
+    data_sources = [
+        (args.code_data_dir, args.code_weight, fim_fn),
+        (DATA_DIR, 1.0 - args.code_weight, None),
+    ]
+    print0(f"Mixed data: {args.code_weight:.0%} code (FIM rate={args.fim_rate}) + {1-args.code_weight:.0%} text")
+    train_loader = mixed_tokenizing_distributed_data_loader_bos_bestfit(
+        tokenizer, args.device_batch_size, args.max_seq_len, split="train",
+        data_sources=data_sources, device=device,
+    )
+else:
+    train_loader = tokenizing_distributed_data_loader_bos_bestfit(
+        "train", tokenizer, args.device_batch_size, args.max_seq_len, ddp_rank, ddp_world_size, device
+    )
 x, y, _ = next(train_loader)
 
 # ---- Compile ----

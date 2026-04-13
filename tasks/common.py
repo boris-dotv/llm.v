@@ -83,7 +83,19 @@ class TaskMixture(Task):
         """
         assert 0 <= index < self.num_conversations, f"Index {index} out of range for mixture with {self.num_conversations} conversations"
         task_idx, local_idx = self.index_map[index]
-        return self.tasks[task_idx][local_idx]
+        conversation = self.tasks[task_idx][local_idx]
+        # Tag the conversation so reward() can dispatch to the correct sub-task
+        if isinstance(conversation, dict):
+            conversation = dict(conversation)  # shallow copy to avoid mutating cached data
+            conversation["_mixture_task_idx"] = task_idx
+        return conversation
+
+    def reward(self, conversation, assistant_response):
+        """Dispatch to the reward() method of the sub-task that produced this conversation."""
+        task_idx = conversation.get("_mixture_task_idx")
+        if task_idx is None:
+            raise ValueError("conversation is missing '_mixture_task_idx'; was it produced by this TaskMixture?")
+        return self.tasks[task_idx].reward(conversation, assistant_response)
 
 
 class TaskSequence(Task):

@@ -29,6 +29,10 @@ from tasks.mmlu import MMLU
 from tasks.smoltalk import SmolTalk
 from tasks.customjson import CustomJSON
 from tasks.spellingbee import SimpleSpelling, SpellingBee
+from tasks.magicoder import MagicoderOSS, MagicoderEvol
+from tasks.code_feedback import CodeFeedback
+from tasks.sc2_exec import SC2ExecFiltered
+from tasks.open_code_interp import OpenCodeInterpreter
 
 # -----------------------------------------------------------------------------
 # CLI arguments
@@ -106,19 +110,17 @@ for opt in optimizers:
 base_dir = get_base_dir()
 identity_conversations_filepath = os.path.join(base_dir, "identity_conversations.jsonl")
 train_dataset = TaskMixture([
-    SmolTalk(split="train"), # 460K rows of general conversations
-    MMLU(subset="auxiliary_train", split="train"), # 100K rows of multiple choice problems drawn from ARC, MC_TEST, OBQA, RACE
-    GSM8K(subset="main", split="train"), # 8K rows teaching simple math and (calculator) tool use
-    CustomJSON(filepath=identity_conversations_filepath), # 1000 rows of synthetic identity conversations
-    CustomJSON(filepath=identity_conversations_filepath), # let's do 2 epochs of these
-    SimpleSpelling(size=200000, split="train"), # 200K rows of Simple Spelling (e.g. spell the word 'apple')
-    SpellingBee(size=80000, split="train"), # 80K rows of Spelling Bee (e.g. how many 'r' are in 'strawberry'?)
-]) # total: 460K + 100K + 8K + 200K + 80K = 848K rows
+    MagicoderOSS(split="train"),           # 75K code instruction examples
+    MagicoderEvol(split="train"),          # 110K evolved code instructions
+    SC2ExecFiltered(split="train"),        # 50K execution-verified code
+    CodeFeedback(split="train"),           # 157K multi-source code Q&A
+    OpenCodeInterpreter(split="train"),    # 68K multi-turn code + execution
+    GSM8K(subset="main", split="train"),   # 8K math with tool use (keep)
+]) # total: ~468K rows
 val_dataset = TaskMixture([
-    SmolTalk(split="test"), # 24K rows in test set
-    MMLU(subset="all", split="test", stop=5200), # 14K rows in test set, use only 5.2K to match the train ratios
-    GSM8K(subset="main", split="test", stop=420), # 1.32K rows in test set, use only 420 to match the train ratios
-]) # total: 24K + 14K + 1.32K ~= 39K rows
+    MagicoderOSS(split="train", stop=2000), # use first 2K for val
+    GSM8K(subset="main", split="test", stop=420),
+])
 # DataLoader is defined here, it emits inputs, targets : 2D tensors of shape (device_batch_size, max_seq_len)
 # A big problem is that we don't know the final num_iterations in advance. So we create
 # these two global variables and update them from within the data generator.

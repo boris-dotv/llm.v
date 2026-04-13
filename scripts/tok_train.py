@@ -17,10 +17,15 @@ parser = argparse.ArgumentParser(description='Train a BPE tokenizer')
 parser.add_argument('--max-chars', type=int, default=10_000_000_000, help='Maximum characters to train on (default: 10B)')
 parser.add_argument('--doc-cap', type=int, default=10_000, help='Maximum characters per document (default: 10,000)')
 parser.add_argument('--vocab-size', type=int, default=32768, help='Vocabulary size (default: 32768 = 2^15)')
+parser.add_argument('--code-data-dir', type=str, default=None, help='Path to code data parquets (enables code+text mixed training)')
+parser.add_argument('--code-weight', type=float, default=0.7, help='Fraction of code data in tokenizer training (default: 0.7)')
 args = parser.parse_args()
 print(f"max_chars: {args.max_chars:,}")
 print(f"doc_cap: {args.doc_cap:,}")
 print(f"vocab_size: {args.vocab_size:,}")
+if args.code_data_dir:
+    print(f"code_data_dir: {args.code_data_dir}")
+    print(f"code_weight: {args.code_weight}")
 
 # -----------------------------------------------------------------------------
 # Text iterator
@@ -30,17 +35,54 @@ def text_iterator():
     1) Flatten the batches into a single iterator
     2) Crop every document to args.doc_cap characters
     3) Break when we've seen args.max_chars characters
+    4) If code_data_dir is set, interleave code and text data with weighted round-robin
     """
     nchars = 0
-    for batch in parquets_iter_batched(split="train"):
-        for doc in batch:
-            doc_text = doc
-            if len(doc_text) > args.doc_cap:
-                doc_text = doc_text[:args.doc_cap]
-            nchars += len(doc_text)
-            yield doc_text
-            if nchars > args.max_chars:
-                return
+
+    if args.code_data_dir:
+        # Mixed code + text mode
+        from nanochat.dataset import list_parquet_files
+        import pyarrow.parquet as pq
+
+        code_parquets = list_parquet_files(data_dir=args.code_data_dir)
+        text_batches = parquets_iter_batched(split="train")
+
+        def code_batches():
+            while True:
+                for fp in code_parquets:
+                    pf = pq.ParquetFile(fp)
+                    for rg_idx in range(pf.num_row_groups):
+                        rg = pf.read_row_group(rg_idx)
+                        yield rg.column('text').to_pylist()
+
+        code_iter = code_batches()
+        # weighted round-robin: e.g. 7 code batches per 3 text batches for 0.7 weight
+        code_count = int(args.code_weight * 10)
+        text_count = 10 - code_count
+        step = 0
+        while nchars <= args.max_chars:
+            if step % 10 < code_count:
+                batch = next(code_iter)
+            else:
+                batch = next(text_batches)
+            step += 1
+            for doc in batch:
+                doc_text = doc[:args.doc_cap] if len(doc) > args.doc_cap else doc
+                nchars += len(doc_text)
+                yield doc_text
+                if nchars > args.max_chars:
+                    return
+    else:
+        # Original text-only mode
+        for batch in parquets_iter_batched(split="train"):
+            for doc in batch:
+                doc_text = doc
+                if len(doc_text) > args.doc_cap:
+                    doc_text = doc_text[:args.doc_cap]
+                nchars += len(doc_text)
+                yield doc_text
+                if nchars > args.max_chars:
+                    return
 text_iter = text_iterator()
 
 # -----------------------------------------------------------------------------
