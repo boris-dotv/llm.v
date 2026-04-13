@@ -90,35 +90,15 @@ def write_shard(rows, output_dir, shard_idx):
     return path
 
 
-def stream_starcoderdata(lang):
-    """Stream from bigcode/starcoderdata using data_dir for language filtering."""
+def stream_the_stack_v1(lang):
+    """Stream from bigcode/the-stack-dedup. Ungated, native parquet, ~358B tokens."""
     ds = load_dataset(
-        "bigcode/starcoderdata",
-        data_dir=lang,
+        "bigcode/the-stack-dedup",
+        data_dir=f"data/{lang}",
         split="train",
         streaming=True,
-        trust_remote_code=True,
     )
     for row in ds:
-        content = row.get("content", "")
-        if not content:
-            continue
-        yield {"text": content, "lang": lang, **{k: row.get(k) for k in
-               ("size", "avg_line_length", "alphanum_fraction") if k in row}}
-
-
-def stream_stack_v2(lang):
-    """Stream from bigcode/the-stack-v2-dedup. Requires HF login."""
-    ds = load_dataset(
-        "bigcode/the-stack-v2-dedup",
-        split="train",
-        streaming=True,
-        trust_remote_code=True,
-    )
-    for row in ds:
-        row_lang = row.get("lang", "").lower()
-        if row_lang != lang:
-            continue
         content = row.get("content", "")
         if not content:
             continue
@@ -130,9 +110,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Download code data and write filtered parquet shards."
     )
-    parser.add_argument("--source", default="starcoderdata",
-                        choices=["starcoderdata", "the-stack-v2"],
-                        help="Dataset source (default: starcoderdata)")
+    parser.add_argument("--source", default="the-stack-v1",
+                        choices=["the-stack-v1"],
+                        help="Dataset source (default: the-stack-v1 = bigcode/the-stack-dedup)")
     parser.add_argument("--languages", default=",".join(DEFAULT_LANGUAGES),
                         help="Comma-separated list of languages")
     parser.add_argument("--output-dir", default=None,
@@ -159,7 +139,7 @@ def main():
         print(f"Resuming — skipping {shard_idx} already-complete shard(s).")
         print()
 
-    stream_fn = stream_starcoderdata if args.source == "starcoderdata" else stream_stack_v2
+    stream_fn = stream_the_stack_v1
     rows_buf = []
     total_seen = 0
     total_kept = 0
