@@ -1,68 +1,40 @@
 """
 Download code pretraining data from HuggingFace.
 
-Supports two sources:
-  - bigcode/starcoderdata (default, ungated, ~1T tokens, curated)
-  - bigcode/the-stack-v2-dedup (gated, ~3T tokens, requires HF login)
+Downloads raw parquet files directly via huggingface_hub, bypassing the
+datasets library entirely (avoids "loading scripts no longer supported"
+errors). Reads each parquet, applies quality filters, renames content->text,
+and writes output shards.
 
-Streams the dataset, applies quality filters, and writes parquet shards with a
-`text` column to a configurable output directory. Shards are named
-shard_NNNNN.parquet, matching the FineWeb convention used by the dataloader.
+Default source: bigcode/the-stack-dedup (permissive licenses, ~358B tokens)
 
 Usage:
     python scripts/download_code_data.py
     python scripts/download_code_data.py --max-shards 5
-    python scripts/download_code_data.py --source the-stack-v2
-    python scripts/download_code_data.py --languages python,javascript,typescript
+    python scripts/download_code_data.py --languages python,javascript
 """
 
 import os
 import argparse
 import pyarrow as pa
 import pyarrow.parquet as pq
+from huggingface_hub import HfFileSystem
 
-from datasets import load_dataset
 from nanochat.common import get_base_dir
-
-# ---------------------------------------------------------------------------
-# Defaults
 
 DEFAULT_LANGUAGES = [
     "python", "javascript", "typescript", "java", "c", "cpp",
     "go", "rust", "kotlin", "swift", "scala", "ruby", "php", "shell",
 ]
 DEFAULT_SHARD_SIZE = 100_000
+REPO_ID = "bigcode/the-stack-dedup"
 
-# Language name mapping: our names -> dataset config names
-STARCODERDATA_LANG_MAP = {
-    "python": "python",
-    "javascript": "javascript",
-    "typescript": "typescript",
-    "java": "java",
-    "c": "c",
-    "cpp": "cpp",
-    "go": "go",
-    "rust": "rust",
-    "kotlin": "kotlin",
-    "swift": "swift",
-    "scala": "scala",
-    "ruby": "ruby",
-    "php": "php",
-    "shell": "shell",
-}
 
-# ---------------------------------------------------------------------------
-# Quality filter
-
-def passes_quality_filter(row):
-    """Return True if a row passes all quality filters."""
-    size = row.get("size") or row.get("blob_size") or 0
-    if size >= 100 * 1024:
+def passes_quality_filter(content, avg_line_length=None, alphanum_fraction=None):
+    if len(content.encode("utf-8", errors="ignore")) >= 100 * 1024:
         return False
-    avg_line_length = row.get("avg_line_length")
     if avg_line_length is not None and avg_line_length >= 200:
         return False
-    alphanum_fraction = row.get("alphanum_fraction")
     if alphanum_fraction is not None and alphanum_fraction <= 0.25:
         return False
     return True
@@ -90,42 +62,33 @@ def write_shard(rows, output_dir, shard_idx):
     return path
 
 
-def stream_the_stack_v1(lang):
-    """Stream from bigcode/the-stack-dedup. Ungated, native parquet, ~358B tokens."""
+def list_parquet_files_for_lang(fs, lang):
+    """List all parquet files for a language in the-stack-dedup repo."""
+    path = f"datasets/{REPO_ID}/data/{lang}"
     try:
-        ds = load_dataset(
-            "bigcode/the-stack-dedup",
-            data_dir=f"data/{lang}",
-            split="train",
-            streaming=True,
-        )
-    except Exception:
-        # Fallback: try codeparrot/github-code which is fully ungated
-        ds = load_dataset(
-            "codeparrot/github-code",
-            streaming=True,
-            split="train",
-            languages=[lang],
-        )
-    for row in ds:
-        content = row.get("content") or row.get("code") or ""
-        if not content:
-            continue
-        yield {"text": content, "lang": lang, **{k: row.get(k) for k in
-               ("size", "avg_line_length", "alphanum_fraction") if k in row}}
+        files = fs.ls(path, detail=False)
+        return [f for f in files if f.endswith(".parquet")]
+    except FileNotFoundError:
+        return []
+
+
+def stream_parquet_from_hf(fs, hf_path):
+    """Read a single parquet file from HuggingFace and yield rows."""
+    with fs.open(hf_path, "rb") as f:
+        table = pq.read_table(f)
+    for i in range(len(table)):
+        row = {col: table.column(col)[i].as_py() for col in table.column_names}
+        yield row
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Download code data and write filtered parquet shards."
     )
-    parser.add_argument("--source", default="the-stack-v1",
-                        choices=["the-stack-v1"],
-                        help="Dataset source (default: the-stack-v1 = bigcode/the-stack-dedup)")
     parser.add_argument("--languages", default=",".join(DEFAULT_LANGUAGES),
                         help="Comma-separated list of languages")
     parser.add_argument("--output-dir", default=None,
-                        help="Directory for parquet shards (default: $NANOCHAT_BASE_DIR/code_data/)")
+                        help="Directory for parquet shards")
     parser.add_argument("--max-shards", type=int, default=-1,
                         help="Max shards to write (-1 = unlimited)")
     parser.add_argument("--shard-size", type=int, default=DEFAULT_SHARD_SIZE,
@@ -136,19 +99,20 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     languages = [lang.strip() for lang in args.languages.split(",") if lang.strip()]
-    print(f"Source       : {args.source}")
+    print(f"Repo         : {REPO_ID}")
     print(f"Output dir   : {output_dir}")
     print(f"Languages    : {languages}")
     print(f"Shard size   : {args.shard_size:,} rows")
     print(f"Max shards   : {'unlimited' if args.max_shards == -1 else args.max_shards}")
-    print()
+    print(flush=True)
+
+    fs = HfFileSystem()
 
     shard_idx = find_next_shard_idx(output_dir)
     if shard_idx > 0:
         print(f"Resuming — skipping {shard_idx} already-complete shard(s).")
-        print()
+        print(flush=True)
 
-    stream_fn = stream_the_stack_v1
     rows_buf = []
     total_seen = 0
     total_kept = 0
@@ -158,38 +122,51 @@ def main():
         if args.max_shards != -1 and shards_written >= args.max_shards:
             break
 
-        print(f"[{lang}] Streaming from {args.source} ...")
-        try:
-            for row in stream_fn(lang):
-                total_seen += 1
-
-                if not passes_quality_filter(row):
-                    continue
-
-                rows_buf.append({"text": row["text"], "lang": lang})
-                total_kept += 1
-
-                if len(rows_buf) >= args.shard_size:
-                    path = write_shard(rows_buf, output_dir, shard_idx)
-                    rows_buf = []
-                    shards_written += 1
-                    print(
-                        f"  Wrote shard {shard_idx:05d} ({args.shard_size:,} rows) -> {path}"
-                        f"  [seen={total_seen:,} kept={total_kept:,}]"
-                    )
-                    shard_idx += 1
-
-                    if args.max_shards != -1 and shards_written >= args.max_shards:
-                        print(f"Reached --max-shards={args.max_shards}, stopping.")
-                        break
-        except Exception as e:
-            print(f"  WARNING: Could not load language '{lang}': {e}")
+        print(f"[{lang}] Listing parquet files ...", flush=True)
+        pq_files = list_parquet_files_for_lang(fs, lang)
+        if not pq_files:
+            print(f"  No parquet files found for '{lang}', skipping.", flush=True)
             continue
+        print(f"  Found {len(pq_files)} parquet files", flush=True)
+
+        for pq_file in pq_files:
+            if args.max_shards != -1 and shards_written >= args.max_shards:
+                break
+
+            fname = os.path.basename(pq_file)
+            print(f"  Reading {fname} ...", end=" ", flush=True)
+            try:
+                for row in stream_parquet_from_hf(fs, pq_file):
+                    total_seen += 1
+                    content = row.get("content", "")
+                    if not content:
+                        continue
+                    avg_ll = row.get("avg_line_length")
+                    alpha = row.get("alphanum_fraction")
+                    if not passes_quality_filter(content, avg_ll, alpha):
+                        continue
+                    rows_buf.append({"text": content, "lang": lang})
+                    total_kept += 1
+
+                    if len(rows_buf) >= args.shard_size:
+                        path = write_shard(rows_buf, output_dir, shard_idx)
+                        rows_buf = []
+                        shards_written += 1
+                        print(
+                            f"\n  Wrote shard {shard_idx:05d} ({args.shard_size:,} rows)"
+                            f"  [seen={total_seen:,} kept={total_kept:,}]",
+                            flush=True,
+                        )
+                        shard_idx += 1
+                print(f"done (total kept so far: {total_kept:,})", flush=True)
+            except Exception as e:
+                print(f"ERROR: {e}", flush=True)
+                continue
 
     if rows_buf and (args.max_shards == -1 or shards_written < args.max_shards):
         path = write_shard(rows_buf, output_dir, shard_idx)
         shards_written += 1
-        print(f"  Wrote shard {shard_idx:05d} ({len(rows_buf):,} rows, partial) -> {path}")
+        print(f"  Wrote shard {shard_idx:05d} ({len(rows_buf):,} rows, partial)", flush=True)
 
     print()
     print(f"Done. Shards written: {shards_written}  |  Rows kept: {total_kept:,}  |  Rows seen: {total_seen:,}")
