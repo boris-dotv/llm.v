@@ -6,6 +6,7 @@ import os
 import re
 import logging
 import urllib.request
+from datetime import timedelta
 import torch
 import torch.distributed as dist
 from filelock import FileLock
@@ -177,7 +178,8 @@ def compute_init(device_type="cuda"): # cuda|cpu|mps
     if is_ddp_requested and device_type == "cuda":
         device = torch.device("cuda", ddp_local_rank)
         torch.cuda.set_device(device)  # make "cuda" default to this device
-        dist.init_process_group(backend="nccl", device_id=device)
+        nccl_timeout = int(os.environ.get("NCCL_TIMEOUT", 1800000))
+        dist.init_process_group(backend="nccl", device_id=device, timeout=timedelta(milliseconds=nccl_timeout))
         dist.barrier()
     else:
         device = torch.device(device_type) # mps|cpu
