@@ -31,7 +31,6 @@ from tasks.smoltalk import SmolTalk
 from tasks.customjson import CustomJSON
 from tasks.spellingbee import SimpleSpelling, SpellingBee
 from tasks.magicoder import MagicoderOSS, MagicoderEvol
-from tasks.open_code_interp import OpenCodeInterpreter
 
 # -----------------------------------------------------------------------------
 # CLI arguments
@@ -89,9 +88,8 @@ identity_conversations_filepath = os.path.join(get_base_dir(), "identity_convers
 train_ds = TaskMixture([
     MagicoderOSS(split="train"),           # 75K code instruction examples
     MagicoderEvol(split="train"),          # 110K evolved code instructions
-    OpenCodeInterpreter(split="train"),    # 68K multi-turn code + execution
     GSM8K(subset="main", split="train"),   # 8K math with tool use (keep)
-]) # ~261K total rows
+]) # ~193K total rows
 val_ds = SmolTalk(split="test") # general conversations, 24K rows (though we don't actually use all of it)
 
 # -----------------------------------------------------------------------------

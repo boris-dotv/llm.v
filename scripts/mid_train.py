@@ -32,7 +32,6 @@ from tasks.spellingbee import SimpleSpelling, SpellingBee
 from tasks.magicoder import MagicoderOSS, MagicoderEvol
 from tasks.code_feedback import CodeFeedback
 from tasks.sc2_exec import SC2ExecFiltered
-from tasks.open_code_interp import OpenCodeInterpreter
 
 # -----------------------------------------------------------------------------
 # CLI arguments
@@ -114,9 +113,8 @@ train_dataset = TaskMixture([
     MagicoderEvol(split="train"),          # 110K evolved code instructions
     SC2ExecFiltered(split="train"),        # 50K execution-verified code
     CodeFeedback(split="train"),           # 157K multi-source code Q&A
-    OpenCodeInterpreter(split="train"),    # 68K multi-turn code + execution
     GSM8K(subset="main", split="train"),   # 8K math with tool use (keep)
-]) # total: ~468K rows
+]) # total: ~400K rows
 val_dataset = TaskMixture([
     MagicoderOSS(split="train", stop=2000), # use first 2K for val
     GSM8K(subset="main", split="test", stop=420),
