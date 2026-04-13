@@ -92,14 +92,23 @@ def write_shard(rows, output_dir, shard_idx):
 
 def stream_the_stack_v1(lang):
     """Stream from bigcode/the-stack-dedup. Ungated, native parquet, ~358B tokens."""
-    ds = load_dataset(
-        "bigcode/the-stack-dedup",
-        data_dir=f"data/{lang}",
-        split="train",
-        streaming=True,
-    )
+    try:
+        ds = load_dataset(
+            "bigcode/the-stack-dedup",
+            data_dir=f"data/{lang}",
+            split="train",
+            streaming=True,
+        )
+    except Exception:
+        # Fallback: try codeparrot/github-code which is fully ungated
+        ds = load_dataset(
+            "codeparrot/github-code",
+            streaming=True,
+            split="train",
+            languages=[lang],
+        )
     for row in ds:
-        content = row.get("content", "")
+        content = row.get("content") or row.get("code") or ""
         if not content:
             continue
         yield {"text": content, "lang": lang, **{k: row.get(k) for k in
