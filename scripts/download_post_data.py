@@ -82,7 +82,7 @@ def download_dataset(key, base_dir, hf_id, splits):
             print(f"  [skip] {key} already exists at {save_dir}")
             return 0
         print(f"  Downloading {hf_id} (split={splits}) ...")
-        ds = load_dataset(hf_id, split=splits)
+        ds = load_dataset(hf_id, split=splits, trust_remote_code=True)
         ds.save_to_disk(save_dir)
         print(f"  Saved {len(ds):,} rows -> {save_dir}")
         return 1
@@ -95,7 +95,7 @@ def download_dataset(key, base_dir, hf_id, splits):
                 print(f"  [skip] {save_name} already exists at {save_dir}")
                 continue
             print(f"  Downloading {hf_id} (split={split_name}) ...")
-            ds = load_dataset(hf_id, split=split_name)
+            ds = load_dataset(hf_id, split=split_name, trust_remote_code=True)
             ds.save_to_disk(save_dir)
             print(f"  Saved {len(ds):,} rows -> {save_dir}")
             downloaded += 1

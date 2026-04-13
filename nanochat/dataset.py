@@ -73,9 +73,12 @@ def download_single_file(index):
 
     # Download with retries
     max_attempts = 5
+    # Use system cert bundle if available (fixes SSL issues on some machines)
+    import ssl
+    cert_file = os.environ.get("SSL_CERT_FILE", ssl.get_default_verify_paths().cafile)
     for attempt in range(1, max_attempts + 1):
         try:
-            response = requests.get(url, stream=True, timeout=30)
+            response = requests.get(url, stream=True, timeout=30, verify=cert_file or True)
             response.raise_for_status()
             # Write to temporary file first
             temp_path = filepath + f".tmp"
