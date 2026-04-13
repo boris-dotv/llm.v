@@ -1,15 +1,18 @@
 """
-Download code pretraining data from bigcode/the-stack-v2-dedup on HuggingFace.
+Download code pretraining data from HuggingFace.
+
+Supports two sources:
+  - bigcode/starcoderdata (default, ungated, ~1T tokens, curated)
+  - bigcode/the-stack-v2-dedup (gated, ~3T tokens, requires HF login)
 
 Streams the dataset, applies quality filters, and writes parquet shards with a
-`text` column (renamed from `content`) to a configurable output directory.
-Shards are named shard_NNNNN.parquet, matching the FineWeb convention used by
-the existing dataloader.
+`text` column to a configurable output directory. Shards are named
+shard_NNNNN.parquet, matching the FineWeb convention used by the dataloader.
 
 Usage:
     python scripts/download_code_data.py
     python scripts/download_code_data.py --max-shards 5
-    python scripts/download_code_data.py --output-dir /path/to/output --shard-size 50000
+    python scripts/download_code_data.py --source the-stack-v2
     python scripts/download_code_data.py --languages python,javascript,typescript
 """
 
@@ -30,20 +33,35 @@ DEFAULT_LANGUAGES = [
 ]
 DEFAULT_SHARD_SIZE = 100_000
 
+# Language name mapping: our names -> dataset config names
+STARCODERDATA_LANG_MAP = {
+    "python": "python",
+    "javascript": "javascript",
+    "typescript": "typescript",
+    "java": "java",
+    "c": "c",
+    "cpp": "cpp",
+    "go": "go",
+    "rust": "rust",
+    "kotlin": "kotlin",
+    "swift": "swift",
+    "scala": "scala",
+    "ruby": "ruby",
+    "php": "php",
+    "shell": "shell",
+}
+
 # ---------------------------------------------------------------------------
 # Quality filter
 
 def passes_quality_filter(row):
     """Return True if a row passes all quality filters."""
-    # File size < 100 KB (size field is in bytes)
-    size = row.get("size") or row.get("blob_size")
-    if size is not None and size >= 100 * 1024:
+    size = row.get("size") or row.get("blob_size") or 0
+    if size >= 100 * 1024:
         return False
-    # avg_line_length < 200
     avg_line_length = row.get("avg_line_length")
     if avg_line_length is not None and avg_line_length >= 200:
         return False
-    # alphanum_fraction > 0.25
     alphanum_fraction = row.get("alphanum_fraction")
     if alphanum_fraction is not None and alphanum_fraction <= 0.25:
         return False
@@ -55,7 +73,6 @@ def build_shard_path(output_dir, shard_idx):
 
 
 def find_next_shard_idx(output_dir):
-    """Return the index of the first shard that doesn't exist on disk."""
     idx = 0
     while os.path.exists(build_shard_path(output_dir, idx)):
         idx += 1
@@ -65,8 +82,6 @@ def find_next_shard_idx(output_dir):
 def write_shard(rows, output_dir, shard_idx):
     path = build_shard_path(output_dir, shard_idx)
     tmp_path = path + ".tmp"
-    # rows is a list of dicts; we only need the `text` column for the dataloader,
-    # but carrying language along is useful for inspection.
     texts = [r["text"] for r in rows]
     langs = [r["lang"] for r in rows]
     table = pa.table({"text": texts, "lang": langs})
@@ -75,52 +90,76 @@ def write_shard(rows, output_dir, shard_idx):
     return path
 
 
+def stream_starcoderdata(lang):
+    """Stream from bigcode/starcoderdata using data_dir for language filtering."""
+    ds = load_dataset(
+        "bigcode/starcoderdata",
+        data_dir=lang,
+        split="train",
+        streaming=True,
+        trust_remote_code=True,
+    )
+    for row in ds:
+        content = row.get("content", "")
+        if not content:
+            continue
+        yield {"text": content, "lang": lang, **{k: row.get(k) for k in
+               ("size", "avg_line_length", "alphanum_fraction") if k in row}}
+
+
+def stream_stack_v2(lang):
+    """Stream from bigcode/the-stack-v2-dedup. Requires HF login."""
+    ds = load_dataset(
+        "bigcode/the-stack-v2-dedup",
+        split="train",
+        streaming=True,
+        trust_remote_code=True,
+    )
+    for row in ds:
+        row_lang = row.get("lang", "").lower()
+        if row_lang != lang:
+            continue
+        content = row.get("content", "")
+        if not content:
+            continue
+        yield {"text": content, "lang": lang, **{k: row.get(k) for k in
+               ("size", "avg_line_length", "alphanum_fraction") if k in row}}
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Download The Stack v2 dedup and write filtered parquet shards."
+        description="Download code data and write filtered parquet shards."
     )
-    parser.add_argument(
-        "--languages",
-        default=",".join(DEFAULT_LANGUAGES),
-        help="Comma-separated list of languages to include (default: all 14 preset languages)",
-    )
-    parser.add_argument(
-        "--output-dir",
-        default=None,
-        help="Directory to write parquet shards (default: $NANOCHAT_BASE_DIR/code_data/)",
-    )
-    parser.add_argument(
-        "--max-shards",
-        type=int,
-        default=-1,
-        help="Maximum number of shards to write. -1 = unlimited (default: -1)",
-    )
-    parser.add_argument(
-        "--shard-size",
-        type=int,
-        default=DEFAULT_SHARD_SIZE,
-        help=f"Number of rows per shard (default: {DEFAULT_SHARD_SIZE})",
-    )
+    parser.add_argument("--source", default="starcoderdata",
+                        choices=["starcoderdata", "the-stack-v2"],
+                        help="Dataset source (default: starcoderdata)")
+    parser.add_argument("--languages", default=",".join(DEFAULT_LANGUAGES),
+                        help="Comma-separated list of languages")
+    parser.add_argument("--output-dir", default=None,
+                        help="Directory for parquet shards (default: $NANOCHAT_BASE_DIR/code_data/)")
+    parser.add_argument("--max-shards", type=int, default=-1,
+                        help="Max shards to write (-1 = unlimited)")
+    parser.add_argument("--shard-size", type=int, default=DEFAULT_SHARD_SIZE,
+                        help=f"Rows per shard (default: {DEFAULT_SHARD_SIZE})")
     args = parser.parse_args()
 
-    # Resolve output directory
     output_dir = args.output_dir or os.path.join(get_base_dir(), "code_data")
     os.makedirs(output_dir, exist_ok=True)
 
     languages = [lang.strip() for lang in args.languages.split(",") if lang.strip()]
+    print(f"Source       : {args.source}")
     print(f"Output dir   : {output_dir}")
     print(f"Languages    : {languages}")
     print(f"Shard size   : {args.shard_size:,} rows")
     print(f"Max shards   : {'unlimited' if args.max_shards == -1 else args.max_shards}")
     print()
 
-    # Resume: skip shards that already exist
     shard_idx = find_next_shard_idx(output_dir)
     if shard_idx > 0:
         print(f"Resuming — skipping {shard_idx} already-complete shard(s).")
         print()
 
-    # Stream one language subset at a time (avoids interleaving complexity)
+    stream_fn = stream_starcoderdata if args.source == "starcoderdata" else stream_stack_v2
     rows_buf = []
     total_seen = 0
     total_kept = 0
@@ -130,54 +169,38 @@ def main():
         if args.max_shards != -1 and shards_written >= args.max_shards:
             break
 
-        print(f"[{lang}] Streaming ...")
+        print(f"[{lang}] Streaming from {args.source} ...")
         try:
-            ds = load_dataset(
-                "bigcode/the-stack-v2-dedup",
-                data_dir=f"data/{lang}",
-                split="train",
-                streaming=True,
-            )
+            for row in stream_fn(lang):
+                total_seen += 1
+
+                if not passes_quality_filter(row):
+                    continue
+
+                rows_buf.append({"text": row["text"], "lang": lang})
+                total_kept += 1
+
+                if len(rows_buf) >= args.shard_size:
+                    path = write_shard(rows_buf, output_dir, shard_idx)
+                    rows_buf = []
+                    shards_written += 1
+                    print(
+                        f"  Wrote shard {shard_idx:05d} ({args.shard_size:,} rows) -> {path}"
+                        f"  [seen={total_seen:,} kept={total_kept:,}]"
+                    )
+                    shard_idx += 1
+
+                    if args.max_shards != -1 and shards_written >= args.max_shards:
+                        print(f"Reached --max-shards={args.max_shards}, stopping.")
+                        break
         except Exception as e:
             print(f"  WARNING: Could not load language '{lang}': {e}")
             continue
 
-        for row in ds:
-            total_seen += 1
-
-            # Quality filter
-            if not passes_quality_filter(row):
-                continue
-
-            # Rename content -> text, keep lang tag
-            content = row.get("content", "")
-            if not content:
-                continue
-            rows_buf.append({"text": content, "lang": lang})
-            total_kept += 1
-
-            # Flush a shard when buffer is full
-            if len(rows_buf) >= args.shard_size:
-                path = write_shard(rows_buf, output_dir, shard_idx)
-                rows_buf = []
-                shards_written += 1
-                print(
-                    f"  Wrote shard {shard_idx:05d} ({args.shard_size:,} rows) -> {path}"
-                    f"  [seen={total_seen:,} kept={total_kept:,}]"
-                )
-                shard_idx += 1
-
-                if args.max_shards != -1 and shards_written >= args.max_shards:
-                    print(f"Reached --max-shards={args.max_shards}, stopping.")
-                    break
-
-    # Write any leftover rows as a partial final shard (skip if empty)
     if rows_buf and (args.max_shards == -1 or shards_written < args.max_shards):
         path = write_shard(rows_buf, output_dir, shard_idx)
         shards_written += 1
-        print(
-            f"  Wrote shard {shard_idx:05d} ({len(rows_buf):,} rows, partial) -> {path}"
-        )
+        print(f"  Wrote shard {shard_idx:05d} ({len(rows_buf):,} rows, partial) -> {path}")
 
     print()
     print(f"Done. Shards written: {shards_written}  |  Rows kept: {total_kept:,}  |  Rows seen: {total_seen:,}")
