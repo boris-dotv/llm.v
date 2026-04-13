@@ -46,7 +46,7 @@ torch = [
     { index = "pytorch-cpu", extra = "cpu" },
     { index = "pytorch-cu128", extra = "gpu" },
 ]
-fla = { git = "https://github.com/sustcsonglin/flash-linear-attention" }
+flash-linear-attention = { git = "https://github.com/sustcsonglin/flash-linear-attention" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
@@ -64,10 +64,11 @@ cpu = [
 ]
 gpu = [
     "torch>=2.9.1",
-    "fla>=0.1.0",
+    "flash-linear-attention>=0.1.0",
 ]
 
 [tool.uv]
+environments = ["sys_platform == 'linux'", "sys_platform == 'darwin'"]
 conflicts = [
     [
         { extra = "cpu" },
