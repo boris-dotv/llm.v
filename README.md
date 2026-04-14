@@ -204,11 +204,16 @@ Train a 4B-parameter depth-32 model with 70% code + 30% text data, FIM, and code
 python -m scripts.download_code_data
 
 # Launch pretraining
-export NANOCHAT_BASE_DIR=/path/to/data_dir
+export NANOCHAT_BASE_DIR=/home/work/compass_max_posttrain_1/.cz/sala_v_data
+cd /home/work/compass_max_posttrain_1/.cz/llm.v && source .venv/bin/activate
+
 nohup bash -c '
 unset CUDA_VISIBLE_DEVICES
+export NANOCHAT_BASE_DIR=/home/work/compass_max_posttrain_1/.cz/sala_v_data
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 export NCCL_TIMEOUT=1800000
 export TORCH_NCCL_BLOCKING_WAIT=0
+cd /home/work/compass_max_posttrain_1/.cz/llm.v
 source .venv/bin/activate
 
 torchrun --standalone --nproc_per_node=8 -m scripts.base_train -- \
@@ -222,10 +227,19 @@ torchrun --standalone --nproc_per_node=8 -m scripts.base_train -- \
 ' > $NANOCHAT_BASE_DIR/logs/pretrain.log 2>&1 &
 ```
 
+Monitor training:
+```bash
+tail -f /home/work/compass_max_posttrain_1/.cz/sala_v_data/logs/pretrain.log | grep -v httpx
+
+# Health check
+python scripts/analyze_log.py /home/work/compass_max_posttrain_1/.cz/sala_v_data/logs/pretrain.log
+```
+
 Notes:
-- `--device-batch-size=4` fits 80GB H100s (8 would OOM at this depth)
+- `--device-batch-size=4` fits 80GB H100s (8 OOMs at this depth)
 - `--target-param-data-ratio=20` trains on 20x params in tokens (~80B tokens, Chinchilla-optimal)
 - `NCCL_TIMEOUT=1800000` gives 30-min timeout for first torch.compile pass
+- `SSL_CERT_FILE` needed for HuggingFace data downloads behind corporate proxies
 - `--run=dummy` disables wandb; set to a name to enable logging
 
 ## Bigger models
