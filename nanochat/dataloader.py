@@ -53,6 +53,10 @@ def _document_batches(split, resume_state_dict, tokenizer_batch_size, data_dir=N
         while pq_idx < len(parquet_paths):
             filepath = parquet_paths[pq_idx]
             pf = pq.ParquetFile(filepath)
+            # Fall back to unsharded reading when fewer row groups than ranks
+            # (common for val split which uses a single parquet file)
+            sharded = pf.num_row_groups >= ddp_world_size
+            rg_stride = ddp_world_size if sharded else 1
             # Start from resume point if resuming on same file, otherwise from DDP rank
             if first_pass and (resume_rg_idx is not None) and (pq_idx == resume_pq_idx):
                 base_idx = resume_rg_idx // ddp_world_size
@@ -63,13 +67,13 @@ def _document_batches(split, resume_state_dict, tokenizer_batch_size, data_dir=N
                     continue
                 resume_rg_idx = None  # only do this once
             else:
-                rg_idx = ddp_rank
+                rg_idx = ddp_rank if sharded else 0
             while rg_idx < pf.num_row_groups:
                 rg = pf.read_row_group(rg_idx)
                 batch = rg.column('text').to_pylist()
                 for i in range(0, len(batch), tokenizer_batch_size):
                     yield batch[i:i+tokenizer_batch_size], (pq_idx, rg_idx, epoch)
-                rg_idx += ddp_world_size
+                rg_idx += rg_stride
             pq_idx += 1
         first_pass = False
         epoch += 1
