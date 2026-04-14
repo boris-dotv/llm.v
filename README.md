@@ -195,6 +195,39 @@ pip install fla
 cd /path/to/infllmv2_cuda_impl && pip install -e .
 ```
 
+## Code-Augmented Pretraining (d32, 8xH100)
+
+Train a 4B-parameter depth-32 model with 70% code + 30% text data, FIM, and code data:
+
+```bash
+# Prepare code data first (downloads to $NANOCHAT_BASE_DIR/code_data)
+python -m scripts.download_code_data
+
+# Launch pretraining
+export NANOCHAT_BASE_DIR=/path/to/data_dir
+nohup bash -c '
+unset CUDA_VISIBLE_DEVICES
+export NCCL_TIMEOUT=1800000
+export TORCH_NCCL_BLOCKING_WAIT=0
+source .venv/bin/activate
+
+torchrun --standalone --nproc_per_node=8 -m scripts.base_train -- \
+    --depth=32 --target-param-data-ratio=20 \
+    --device-batch-size=4 \
+    --code-data-dir=$NANOCHAT_BASE_DIR/code_data \
+    --code-weight=0.7 \
+    --fim-rate=0.5 \
+    --spm-rate=0.5 \
+    --run=dummy
+' > $NANOCHAT_BASE_DIR/logs/pretrain.log 2>&1 &
+```
+
+Notes:
+- `--device-batch-size=4` fits 80GB H100s (8 would OOM at this depth)
+- `--target-param-data-ratio=20` trains on 20x params in tokens (~80B tokens, Chinchilla-optimal)
+- `NCCL_TIMEOUT=1800000` gives 30-min timeout for first torch.compile pass
+- `--run=dummy` disables wandb; set to a name to enable logging
+
 ## Bigger models
 
 Unsurprisingly, $100 is not enough to train a highly performant ChatGPT clone. In fact, LLMs are famous for their multi-million dollar capex. For our purposes, I think there are two more scales of interest. First is the ~$300 tier d26 model (i.e. depth=26) that trains in ~12 hours, which slightly outperforms GPT-2 CORE score. Second is the $1000 tier (~41.6 hours), just because it's a nice round number. But both of these are not yet fully supported and therefore not attached here in the master branch yet.
