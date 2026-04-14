@@ -72,6 +72,8 @@ parser.add_argument("--save-every", type=int, default=-1, help="save checkpoints
 # Output
 parser.add_argument("--model-tag", type=str, default=None, help="override model tag for checkpoint directory name")
 # Code data (for code-specialized training)
+parser.add_argument("--init-from", type=str, default=None, help="checkpoint dir to load model weights from (weights only, no optimizer/dataloader/step state)")
+parser.add_argument("--init-from-step", type=int, default=-1, help="step number to load from --init-from checkpoint dir")
 parser.add_argument("--code-data-dir", type=str, default=None, help="path to code data parquets (enables code+text mixed training)")
 parser.add_argument("--code-weight", type=float, default=0.7, help="fraction of tokens from code corpus (default: 0.7)")
 parser.add_argument("--fim-rate", type=float, default=0.5, help="fraction of code docs to apply FIM transform (default: 0.5)")
@@ -170,8 +172,16 @@ with torch.device("meta"):
 model.to_empty(device=device) # All tensors get storage on target device but with uninitialized (garbage) data
 model.init_weights() # All tensors get initialized
 
-# If we are resuming, overwrite the model parameters with those of the checkpoint
+# If initializing from a prior checkpoint (weights only, fresh optimizer/step/dataloader)
 base_dir = get_base_dir()
+if args.init_from and args.init_from_step >= 0:
+    init_dir = os.path.join(base_dir, "base_checkpoints", args.init_from) if not os.path.isabs(args.init_from) else args.init_from
+    print0(f"Initializing model weights from {init_dir} step {args.init_from_step} (weights only, fresh optimizer)")
+    model_data, _, _ = load_checkpoint(init_dir, args.init_from_step, device, load_optimizer=False, rank=ddp_rank)
+    model.load_state_dict(model_data, strict=True, assign=True)
+    del model_data
+
+# If we are resuming, overwrite the model parameters with those of the checkpoint
 output_dirname = args.model_tag if args.model_tag else f"d{args.depth}" # e.g. d12
 checkpoint_dir = os.path.join(base_dir, "base_checkpoints", output_dirname)
 resuming = args.resume_from_step != -1

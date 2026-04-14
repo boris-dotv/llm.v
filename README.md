@@ -195,15 +195,13 @@ pip install fla
 cd /path/to/infllmv2_cuda_impl && pip install -e .
 ```
 
-## Code-Augmented Pretraining (d32, 8xH100)
+## Two-Stage Code Model Training (d32, 8xH100)
 
-Train a 4B-parameter depth-32 model with 70% code + 30% text data, FIM, and code data:
+Train a 4B-parameter code model with staged approach: general pretrain on text, then code continued pretraining (CPT). This follows the Code Llama / Qwen2.5-Coder / DeepSeek-Coder-V2 recipe.
+
+### Stage 1: General Pretrain (~60B tokens, text only)
 
 ```bash
-# Prepare code data first (downloads to $NANOCHAT_BASE_DIR/code_data)
-python -m scripts.download_code_data
-
-# Launch pretraining
 export NANOCHAT_BASE_DIR=/home/work/compass_max_posttrain_1/.cz/sala_v_data
 cd /home/work/compass_max_posttrain_1/.cz/llm.v && source .venv/bin/activate
 
@@ -217,30 +215,85 @@ cd /home/work/compass_max_posttrain_1/.cz/llm.v
 source .venv/bin/activate
 
 torchrun --standalone --nproc_per_node=8 -m scripts.base_train -- \
-    --depth=32 --target-param-data-ratio=20 \
+    --depth=32 --target-param-data-ratio=15 \
     --device-batch-size=4 \
+    --model-tag=d32-general \
+    --run=dummy
+' > $NANOCHAT_BASE_DIR/logs/pretrain_stage1.log 2>&1 &
+```
+
+### Stage 2: Code Continued Pretraining (~20B tokens, 85% code)
+
+After stage 1 finishes, find the last step number from the log, then launch stage 2.
+
+```bash
+# Prepare code data first (if not already done)
+python -m scripts.download_code_data
+
+# Find last step from stage 1 (look for the last checkpoint step printed)
+grep "Saved model" $NANOCHAT_BASE_DIR/logs/pretrain_stage1.log | tail -1
+# e.g. model_009876.pt => LAST_STEP=9876
+
+export NANOCHAT_BASE_DIR=/home/work/compass_max_posttrain_1/.cz/sala_v_data
+cd /home/work/compass_max_posttrain_1/.cz/llm.v && source .venv/bin/activate
+
+nohup bash -c '
+unset CUDA_VISIBLE_DEVICES
+export NANOCHAT_BASE_DIR=/home/work/compass_max_posttrain_1/.cz/sala_v_data
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+export NCCL_TIMEOUT=1800000
+export TORCH_NCCL_BLOCKING_WAIT=0
+cd /home/work/compass_max_posttrain_1/.cz/llm.v
+source .venv/bin/activate
+
+torchrun --standalone --nproc_per_node=8 -m scripts.base_train -- \
+    --depth=32 --num-iterations=3000 \
+    --device-batch-size=4 \
+    --init-from=d32-general --init-from-step=LAST_STEP \
+    --model-tag=d32-coder \
     --code-data-dir=$NANOCHAT_BASE_DIR/code_data \
-    --code-weight=0.7 \
+    --code-weight=0.85 \
     --fim-rate=0.5 \
     --spm-rate=0.5 \
+    --matrix-lr=0.006 \
+    --embedding-lr=0.1 \
+    --unembedding-lr=0.001 \
+    --scalar-lr=0.15 \
+    --warmup-ratio=0.05 \
+    --warmdown-ratio=0.5 \
     --run=dummy
-' > $NANOCHAT_BASE_DIR/logs/pretrain.log 2>&1 &
+' > $NANOCHAT_BASE_DIR/logs/pretrain_stage2.log 2>&1 &
 ```
 
-Monitor training:
+### Monitor training
+
 ```bash
-tail -f /home/work/compass_max_posttrain_1/.cz/sala_v_data/logs/pretrain.log | grep -v httpx
-
+# Stage 1
+tail -f $NANOCHAT_BASE_DIR/logs/pretrain_stage1.log | grep -v httpx
+# Stage 2
+tail -f $NANOCHAT_BASE_DIR/logs/pretrain_stage2.log | grep -v httpx
 # Health check
-python scripts/analyze_log.py /home/work/compass_max_posttrain_1/.cz/sala_v_data/logs/pretrain.log
+python scripts/analyze_log.py $NANOCHAT_BASE_DIR/logs/pretrain_stage1.log
 ```
 
-Notes:
+### Notes
+
+- **Stage 1** uses `--target-param-data-ratio=15` (~60B tokens on fineweb text)
+- **Stage 2** uses `--init-from` to load stage 1 weights only (fresh optimizer, fresh step counter, fresh LR schedule)
+- Stage 2 LR is ~0.3x of stage 1 to avoid catastrophic forgetting of general knowledge
+- `--num-iterations=3000` for stage 2 gives ~20B tokens at batch size 524288 (adjust as needed)
+- `--warmup-ratio=0.05` gives a short warmup for the new code data distribution
 - `--device-batch-size=4` fits 80GB H100s (8 OOMs at this depth)
-- `--target-param-data-ratio=20` trains on 20x params in tokens (~80B tokens, Chinchilla-optimal)
 - `NCCL_TIMEOUT=1800000` gives 30-min timeout for first torch.compile pass
 - `SSL_CERT_FILE` needed for HuggingFace data downloads behind corporate proxies
-- `--run=dummy` disables wandb; set to a name to enable logging
+
+### Kill current run
+
+```bash
+# Find and kill the running torchrun process
+ps aux | grep torchrun | grep base_train | grep -v grep
+kill <PID>  # or: pkill -f "torchrun.*base_train"
+```
 
 ## Bigger models
 

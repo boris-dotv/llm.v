@@ -27,7 +27,7 @@ DEFAULT_LANGUAGES = [
     "go", "rust", "kotlin", "swift", "scala", "ruby", "php", "shell",
 ]
 DEFAULT_SHARD_SIZE = 100_000
-REPO_ID = "bigcode/the-stack-dedup"
+REPO_ID = "bigcode/starcoderdata"
 
 
 def passes_quality_filter(content, avg_line_length=None, alphanum_fraction=None):
