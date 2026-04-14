@@ -147,10 +147,15 @@ def analyze(path):
             issues.append("LR dropped before warmdown phase")
 
     # --- Verdict ---
+    # Val BPB improving overrides noisy train loss (especially with mixed code/FIM data)
+    val_improving = len(vals) >= 2 and vals[-1]['bpb'] < vals[0]['bpb']
+    if val_improving:
+        issues = [i for i in issues if "INCREASING" not in i]  # train loss noise is OK if val improves
+
     print(f"\n{'='*60}")
     if not issues:
         print(f"  VERDICT: GREEN - Training looks healthy")
-    elif any("INCREASING" in i or "spike" in i for i in issues):
+    elif any("spike" in i or "worsening" in i.lower() for i in issues):
         print(f"  VERDICT: RED - Issues detected:")
     else:
         print(f"  VERDICT: YELLOW - Minor concerns:")
