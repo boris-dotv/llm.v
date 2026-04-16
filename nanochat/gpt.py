@@ -266,6 +266,10 @@ class GPT(nn.Module):
             torch.nn.init.uniform_(block.mlp.gate_proj.weight, -s, s)
             torch.nn.init.uniform_(block.mlp.up_proj.weight, -s, s)
             torch.nn.init.zeros_(block.mlp.down_proj.weight)
+            # Learnable RMSNorm weights (meta device + to_empty leaves these as garbage)
+            block.input_layernorm.weight.fill_(1.0)
+            block.post_attention_layernorm.weight.fill_(1.0)
+        self.transformer.ln_f.weight.fill_(1.0)
 
         # Rotary embeddings
         head_dim = self.config.n_embd // self.config.n_head
