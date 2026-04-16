@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-Diagnostic forward trace for the 150M dense model.
-Instruments every stage of the forward pass to find where activations blow up.
-Runs entirely on CPU in fp32.
+Diagnostic forward trace for the 150M dense model (v2).
+Tests candidate fixes for the tied-embedding logit magnitude problem.
 
 Usage (on remote GPU server):
-    PYTHONPATH=. python scripts/diag_forward.py 2>&1 | tee /tmp/diag_forward.log
+    PYTHONPATH=. python scripts/diag_forward.py 2>&1 | tee /tmp/diag_forward_v2.log
 """
 
-import sys
 import math
 import torch
 import torch.nn.functional as F
@@ -31,7 +29,7 @@ def stat(name, t):
         flag = " *** Inf ***"
     elif absmax > 1e4:
         flag = " *** >1e4 ***"
-    print(f"  {name:.<60s} shape={str(list(t.shape)):>20s}  std={t_f.std().item():12.6f}  absmax={absmax:12.4f}  nan={has_nan}  inf={has_inf}{flag}")
+    print(f"  {name:.<60s} shape={str(list(t.shape)):>20s}  std={t_f.std().item():12.6f}  absmax={absmax:12.4f}{flag}")
     return has_nan or has_inf or absmax > 1e4
 
 
@@ -39,6 +37,8 @@ def param_stat(name, p):
     """Print parameter statistics."""
     print(f"  {name:.<60s} shape={str(list(p.shape)):>20s}  std={p.float().std().item():.6f}  min={p.float().min().item():.6f}  max={p.float().max().item():.6f}")
 
+
+EXPECTED_LOSS = math.log(65536)  # 11.0904
 
 # ===========================================================================
 # Config
@@ -52,232 +52,260 @@ BASE_CONFIG = dict(
 )
 
 B, T = 2, 128
-torch.manual_seed(42)
-INPUT_IDS = torch.randint(0, 65536, (B, T))
 
 
 # ===========================================================================
-# Step 0: Build model, print all parameter stats
+# Model builder
 # ===========================================================================
 
-def build_model(config_kwargs):
-    """Build model on CPU in fp32."""
+def build_model(config_kwargs, seed=0):
+    """Build model on CPU in fp32 with deterministic init."""
+    torch.manual_seed(seed)
     config = GPTConfig(**config_kwargs)
-    # Use meta device + to_empty like the real training code
     with torch.device("meta"):
         model = GPT(config, pad_vocab_size_to=1)
     model.to_empty(device="cpu")
     model.init_weights()
-    # Patch rotary embeddings to fp32 for CPU diagnostic (forward asserts bf16)
+    # Patch rotary embeddings to fp32 for CPU diagnostic
     model.cos = model.cos.float()
     model.sin = model.sin.float()
     return model
 
 
-def print_all_params(model, label=""):
+# ===========================================================================
+# Generic forward that returns detailed stats
+# ===========================================================================
+
+def custom_forward(model, input_ids, emb_multiplier=None, pre_logit_divisor=None,
+                   output_scale=1.0, verbose=True):
+    """
+    Run a manual forward through the model, returning stats.
+
+    Args:
+        emb_multiplier: override for embedding scaling (default: config.scale_emb)
+        pre_logit_divisor: override for the divisor before logit projection
+                          (default: config.n_embd / config.dim_model_base = scale_width)
+        output_scale: multiply final logits by this scalar
+        verbose: print per-layer trace
+    """
+    config = model.config
+    B, T = input_ids.shape
+
+    if emb_multiplier is None:
+        emb_multiplier = config.scale_emb
+    if pre_logit_divisor is None:
+        pre_logit_divisor = config.n_embd / config.dim_model_base
+
+    cos_sin = model.cos[:, :T], model.sin[:, :T]
+    window_size = (-1, 0)
+
+    # Embedding
+    x = model.transformer.wte(input_ids) * emb_multiplier
+    if verbose:
+        stat(f"wte(x) * emb_multiplier={emb_multiplier:.4f}", x)
+
+    first_blowup = None
+
+    # Blocks
+    for i, block in enumerate(model.transformer.h):
+        normed = block.input_layernorm(x)
+        with torch.no_grad():
+            attn_out = block.attn(normed, cos_sin, window_size, None)
+        x = x + attn_out * block.residual_scale
+
+        normed2 = block.post_attention_layernorm(x)
+        with torch.no_grad():
+            mlp_out = block.mlp(normed2)
+        x = x + mlp_out * block.residual_scale
+
+        if verbose:
+            blew = stat(f"block {i:2d} | after both residuals", x)
+            if blew and first_blowup is None:
+                first_blowup = i
+
+    # Final norm
+    x = model.transformer.ln_f(x)
+
+    # Pre-logit
+    x_pre_logit = x / pre_logit_divisor
+    pre_logit_std = x_pre_logit.float().std().item()
+
+    # Logits
+    if model.lm_head is not None:
+        logits = model.lm_head(x_pre_logit)
+    else:
+        logits = F.linear(x_pre_logit, model.transformer.wte.weight)
+    logits = logits[..., :config.vocab_size].float()
+    logits = logits * output_scale
+
+    logits_std = logits.std().item()
+    logits_absmax = logits.abs().max().item()
+
+    # Loss
+    torch.manual_seed(99)  # deterministic targets
+    targets = torch.randint(0, config.vocab_size, (B, T))
+    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1)).item()
+
+    wte_std = model.transformer.wte.weight.float().std().item()
+
+    return dict(
+        wte_std=wte_std,
+        pre_logit_std=pre_logit_std,
+        logits_std=logits_std,
+        logits_absmax=logits_absmax,
+        loss=loss,
+        ratio=loss / EXPECTED_LOSS,
+        first_blowup=first_blowup,
+    )
+
+
+def report(name, r):
+    """Print a single-run result line."""
+    print(f"  {name:.<45s}  wte_std={r['wte_std']:.6f}  pre_logit_std={r['pre_logit_std']:.6f}"
+          f"  logits_std={r['logits_std']:.4f}  logits_absmax={r['logits_absmax']:.4f}"
+          f"  loss={r['loss']:.4f}  ratio={r['ratio']:.2f}x")
+
+
+# ===========================================================================
+# Full forward trace (verbose, for Run 1 only)
+# ===========================================================================
+
+def forward_trace(model, input_ids, label=""):
+    """Full verbose trace for the first run."""
     print(f"\n{'='*80}")
-    print(f"PARAMETER STATS{': ' + label if label else ''}")
+    print(f"FORWARD TRACE: {label}")
     print(f"{'='*80}")
 
-    # Embeddings
+    config = model.config
+    B, T = input_ids.shape
+    cos_sin = model.cos[:, :T], model.sin[:, :T]
+    window_size = (-1, 0)
+
+    x_raw = model.transformer.wte(input_ids)
+    stat("wte(x) [before scale_emb]", x_raw)
+
+    x = x_raw * config.scale_emb
+    stat(f"wte(x) * scale_emb={config.scale_emb}", x)
+
+    first_blowup = None
+    for i, block in enumerate(model.transformer.h):
+        normed = block.input_layernorm(x)
+        blew = stat(f"block {i:2d} | after input_layernorm", normed)
+
+        with torch.no_grad():
+            attn_out = block.attn(normed, cos_sin, window_size, None)
+        blew |= stat(f"block {i:2d} | attn output (before residual)", attn_out)
+
+        x = x + attn_out * block.residual_scale
+        blew |= stat(f"block {i:2d} | after attn residual", x)
+
+        normed2 = block.post_attention_layernorm(x)
+        blew |= stat(f"block {i:2d} | after post_attn_layernorm", normed2)
+
+        with torch.no_grad():
+            mlp_out = block.mlp(normed2)
+        blew |= stat(f"block {i:2d} | mlp output (before residual)", mlp_out)
+
+        x = x + mlp_out * block.residual_scale
+        blew |= stat(f"block {i:2d} | after mlp residual", x)
+
+        if blew and first_blowup is None:
+            first_blowup = i
+
+    x = model.transformer.ln_f(x)
+    stat("after ln_f", x)
+
+    scale_width = config.n_embd / config.dim_model_base
+    x_scaled = x / scale_width
+    stat(f"after / scale_width={scale_width:.4f}", x_scaled)
+
+    logits = F.linear(x_scaled, model.transformer.wte.weight)
+    logits = logits[..., :config.vocab_size].float()
+    stat("logits (final)", logits)
+
+    torch.manual_seed(99)
+    targets = torch.randint(0, config.vocab_size, (B, T))
+    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
+    print(f"\n  Loss: {loss.item():.4f}  (expected ~{EXPECTED_LOSS:.4f}, ratio: {loss.item()/EXPECTED_LOSS:.2f}x)")
+    if first_blowup is not None:
+        print(f"  First blowup (>1e4/NaN/Inf): layer {first_blowup}")
+    else:
+        print(f"  No blowup detected")
+    return loss.item()
+
+
+# ===========================================================================
+# Parameter stats
+# ===========================================================================
+
+def print_all_params(model, label=""):
+    print(f"\n{'='*80}")
+    print(f"PARAMETER STATS: {label}")
+    print(f"{'='*80}")
     print("\n--- Embeddings ---")
     param_stat("transformer.wte.weight", model.transformer.wte.weight)
     if model.lm_head is not None:
         param_stat("lm_head.weight", model.lm_head.weight)
     else:
         print("  lm_head: None (tied to wte)")
-
-    for i, block in enumerate(model.transformer.h):
-        if i > 0 and i < 11:
-            continue  # only print first, last, and a middle layer
-        if i == 1:
-            print(f"\n--- Layers 1-10: (same init pattern, skipped) ---")
-            continue
-        print(f"\n--- Layer {i} ---")
+    for i in [0, 11]:
+        block = model.transformer.h[i]
         attn = block.attn
-        # Attention
+        print(f"\n--- Layer {i} ---")
         param_stat(f"  h.{i}.attn.c_q.weight", attn.c_q.weight)
-        param_stat(f"  h.{i}.attn.c_k.weight", attn.c_k.weight)
-        param_stat(f"  h.{i}.attn.c_v.weight", attn.c_v.weight)
         param_stat(f"  h.{i}.attn.c_proj.weight", attn.c_proj.weight)
-        if hasattr(attn, 'o_gate') and attn.o_gate is not None:
-            param_stat(f"  h.{i}.attn.o_gate.weight", attn.o_gate.weight)
-        # MLP
         param_stat(f"  h.{i}.mlp.gate_proj.weight", block.mlp.gate_proj.weight)
-        param_stat(f"  h.{i}.mlp.up_proj.weight", block.mlp.up_proj.weight)
         param_stat(f"  h.{i}.mlp.down_proj.weight", block.mlp.down_proj.weight)
-        # LayerNorm
         param_stat(f"  h.{i}.input_layernorm.weight", block.input_layernorm.weight)
         param_stat(f"  h.{i}.post_attn_layernorm.weight", block.post_attention_layernorm.weight)
-
     print(f"\n--- Final norm ---")
     param_stat("transformer.ln_f.weight", model.transformer.ln_f.weight)
 
 
 # ===========================================================================
-# Step 1: Manual forward trace
-# ===========================================================================
-
-def forward_trace(model, input_ids, label=""):
-    """Run forward manually, printing stats at every stage."""
-    print(f"\n{'='*80}")
-    print(f"FORWARD TRACE{': ' + label if label else ''}")
-    print(f"{'='*80}")
-
-    config = model.config
-    B, T = input_ids.shape
-
-    # Rotary embeddings
-    cos_sin = model.cos[:, :T], model.sin[:, :T]
-    window_size = (-1, 0)
-
-    # 1. Embedding
-    x_emb_raw = model.transformer.wte(input_ids)
-    stat("wte(x) [before scale_emb]", x_emb_raw)
-
-    x = x_emb_raw * config.scale_emb
-    stat(f"wte(x) * scale_emb={config.scale_emb}", x)
-
-    first_blowup_layer = None
-
-    # 2. Each block
-    for i, block in enumerate(model.transformer.h):
-        # Input layernorm
-        normed = block.input_layernorm(x)
-        blew = stat(f"block {i:2d} | after input_layernorm", normed)
-
-        # Attention sublayer
-        with torch.no_grad():
-            attn_out = block.attn(normed, cos_sin, window_size, None)
-        blew |= stat(f"block {i:2d} | attn sublayer output (before residual)", attn_out)
-
-        # Attention residual add
-        x = x + attn_out * block.residual_scale
-        blew |= stat(f"block {i:2d} | after attn residual add", x)
-
-        # Post-attention layernorm
-        normed2 = block.post_attention_layernorm(x)
-        blew |= stat(f"block {i:2d} | after post_attn_layernorm", normed2)
-
-        # MLP sublayer
-        with torch.no_grad():
-            mlp_out = block.mlp(normed2)
-        blew |= stat(f"block {i:2d} | mlp sublayer output (before residual)", mlp_out)
-
-        # MLP residual add
-        x = x + mlp_out * block.residual_scale
-        blew |= stat(f"block {i:2d} | after mlp residual add", x)
-
-        if blew and first_blowup_layer is None:
-            first_blowup_layer = i
-
-    # 3. Final norm
-    x = model.transformer.ln_f(x)
-    stat("after ln_f", x)
-
-    # 4. Scale width
-    scale_width = config.n_embd / config.dim_model_base
-    x_scaled = x / scale_width
-    stat(f"after hidden / scale_width={scale_width:.4f}", x_scaled)
-
-    # 5. Logits
-    if model.lm_head is not None:
-        logits = model.lm_head(x_scaled)
-    else:
-        logits = F.linear(x_scaled, model.transformer.wte.weight)
-    logits = logits[..., :config.vocab_size]
-    logits = logits.float()
-    stat("logits (final)", logits)
-
-    # 6. Loss
-    targets = torch.randint(0, config.vocab_size, (B, T))
-    loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
-    expected = math.log(config.vocab_size)
-    print(f"\n  Loss: {loss.item():.4f}")
-    print(f"  Expected ln(V={config.vocab_size}): {expected:.4f}")
-    print(f"  Ratio loss/expected: {loss.item()/expected:.2f}x")
-    if first_blowup_layer is not None:
-        print(f"  First blowup (>1e4 or NaN/Inf): layer {first_blowup_layer}")
-    else:
-        print(f"  No blowup detected (all activations < 1e4)")
-
-    return loss.item()
-
-
-# ===========================================================================
-# Step 6: Check residual_scale formula
+# Residual scale check
 # ===========================================================================
 
 def check_residual_scale():
     print(f"\n{'='*80}")
     print(f"RESIDUAL SCALE CHECK")
     print(f"{'='*80}")
-    config = GPTConfig(**BASE_CONFIG)
-    expected = 1.4 / (12 ** 0.5)
-    # Build a block to check the stored value
     from nanochat.gpt import Block
+    config = GPTConfig(**BASE_CONFIG)
     block = Block(config, 0, mixer_type="minicpm4")
     actual = block.residual_scale
-    print(f"  config.scale_depth = {config.scale_depth}")
-    print(f"  config.n_layer = {config.n_layer}")
-    print(f"  Expected: scale_depth / sqrt(n_layer) = 1.4 / sqrt(12) = {expected:.6f}")
-    print(f"  Actual block.residual_scale = {actual:.6f}")
+    expected = 1.4 / (12 ** 0.5)
+    print(f"  scale_depth={config.scale_depth}, n_layer={config.n_layer}")
+    print(f"  Expected: 1.4 / sqrt(12) = {expected:.6f}")
+    print(f"  Actual:   {actual:.6f}")
     print(f"  Match: {abs(actual - expected) < 1e-9}")
-    if abs(actual - expected) > 1e-6:
-        # Check common mistakes
-        wrong1 = 1.4 / 12
-        wrong2 = 1.4 * (12 ** 0.5)
-        if abs(actual - wrong1) < 1e-6:
-            print(f"  BUG: using scale_depth / n_layer = {wrong1:.6f} (division, not sqrt)")
-        elif abs(actual - wrong2) < 1e-6:
-            print(f"  BUG: using scale_depth * sqrt(n_layer) = {wrong2:.6f} (multiply, not divide)")
 
 
 # ===========================================================================
-# Step 7: Inspect init_weights summary
+# Init inspection
 # ===========================================================================
 
 def inspect_init():
     print(f"\n{'='*80}")
-    print(f"INIT_WEIGHTS INSPECTION (from reading nanochat/gpt.py)")
+    print(f"INIT_WEIGHTS INSPECTION")
     print(f"{'='*80}")
     print("""
-  Embedding init:
-    wte.weight:        Normal(mean=0, std=1.0)
-    lm_head.weight:    Normal(mean=0, std=0.001)  [if not tied]
+  Embedding:   wte.weight = Normal(0, std=1.0)
+  LM head:     lm_head.weight = Normal(0, std=0.001)  [if untied]
+  Attn Q/K/V:  Uniform(-s, s), s = sqrt(3)/sqrt(n_embd)  →  std = 1/sqrt(n_embd)
+  Attn c_proj:  ZEROS
+  MLP gate/up:  Uniform(-s, s)  [same s]
+  MLP down:     ZEROS
+  RMSNorm:      weight.fill_(1.0)
 
-  Attention projections (per block):
-    c_q.weight:        Uniform(-s, s)  where s = sqrt(3) / sqrt(n_embd)  [std = 1/sqrt(n_embd)]
-    c_k.weight:        same
-    c_v.weight:        same
-    c_proj.weight:     ZEROS
-    o_gate.weight:     ZEROS (if present)
+  Init-time compensation for scale_emb?  NO
+  Init-time compensation for depth?      NO (output projs start at zero)
+  GPT-2 1/sqrt(2*n_layer) scaling?       NO
 
-  MLP projections (per block):
-    gate_proj.weight:  Uniform(-s, s)  [same s]
-    up_proj.weight:    Uniform(-s, s)  [same s]
-    down_proj.weight:  ZEROS
-
-  Learnable RMSNorm weights:
-    input_layernorm.weight:         fill_(1.0)
-    post_attention_layernorm.weight: fill_(1.0)
-    transformer.ln_f.weight:        fill_(1.0)
-
-  Init-time compensation for scale_emb?    NO — wte is init'd with std=1.0 regardless of scale_emb.
-  Init-time compensation for depth?        NO — c_proj and down_proj are zeros, so no depth scaling
-                                           is needed at init. But once training starts and these become
-                                           non-zero, residual_scale = scale_depth/sqrt(n_layer) handles it.
-  GPT-2 style 1/sqrt(2*n_layer) on output projections?  NO — they start at zero instead.
-
-  Key observation for tied embeddings:
-    With tie_word_embeddings=True, logits = F.linear(x / scale_width, wte.weight).
-    wte.weight has std=1.0 (for embedding lookup). This is 1000x larger than the
-    lm_head init (std=0.001) used in the untied case. The scale_width divisor
-    (n_embd/dim_model_base) partially compensates but may not be sufficient.
-    For hidden=768, dim_model_base=256: scale_width=3.0.
-    Effective logit projection "std" ~ 1.0/3.0 = 0.33 vs 0.001 for untied.
-    This means logit std ~ sqrt(768) * 0.33 ≈ 9.2 vs sqrt(768) * 0.001 ≈ 0.028.
-    Cross-entropy loss will be much higher than ln(V) at init for tied embeddings.
+  Tied-embedding problem:
+    wte.weight has std=1.0 → used as logit projection → logit_std ≈ sqrt(768)/3 ≈ 9.2
+    Untied lm_head has std=0.001 → logit_std ≈ sqrt(768)*0.001 ≈ 0.028
+    That's a 330x gap. Need to close it for tied embeddings.
 """)
 
 
@@ -286,49 +314,148 @@ def inspect_init():
 # ===========================================================================
 
 if __name__ == "__main__":
+    torch.manual_seed(0)
+    INPUT_IDS = torch.randint(0, 65536, (B, T))
+
     print("=" * 80)
-    print("DIAGNOSTIC FORWARD TRACE FOR 150M DENSE MODEL")
+    print("DIAGNOSTIC FORWARD TRACE v2 — 150M DENSE MODEL")
     print("=" * 80)
     print(f"Config: {BASE_CONFIG}")
     print(f"Input shape: ({B}, {T})")
+    print(f"Expected loss ln(65536) = {EXPECTED_LOSS:.4f}")
+    print(f"Healthy range: [{EXPECTED_LOSS:.2f}, {2*EXPECTED_LOSS:.2f}]")
 
-    # --- Step 0+1: Build model, print params, trace forward ---
-    print("\n\n### RUN 1: Full muP config (scale_emb=8, scale_depth=1.4, dim_model_base=256) ###")
-    model = build_model(BASE_CONFIG)
+    results = {}
+
+    # ===================================================================
+    # RUN 1: Full muP (verbose trace)
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 1: Full muP (tied, scale_emb=8, scale_depth=1.4, dim_model_base=256)")
+    print("#" * 80)
+    model = build_model(BASE_CONFIG, seed=0)
     print_all_params(model, "Full muP")
-    loss_mup = forward_trace(model, INPUT_IDS, "Full muP")
+    forward_trace(model, INPUT_IDS, "Full muP")
+    r1 = custom_forward(model, INPUT_IDS, verbose=False)
+    results["Run 1: full muP (tied)"] = r1
     del model
 
-    # --- Step 4: Ablation — disable all muP scaling ---
-    print("\n\n### RUN 2: No muP (scale_emb=1.0, scale_depth=1.0, dim_model_base=768) ###")
-    no_mup_config = {**BASE_CONFIG, "scale_emb": 1.0, "scale_depth": 1.0, "dim_model_base": 768}
-    model_nomup = build_model(no_mup_config)
-    loss_nomup = forward_trace(model_nomup, INPUT_IDS, "No muP")
-    del model_nomup
+    # ===================================================================
+    # RUN 2: No muP
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 2: No muP (tied, scale_emb=1, scale_depth=1, dim_model_base=768)")
+    print("#" * 80)
+    no_mup = {**BASE_CONFIG, "scale_emb": 1.0, "scale_depth": 1.0, "dim_model_base": 768}
+    model = build_model(no_mup, seed=0)
+    r2 = custom_forward(model, INPUT_IDS, verbose=False)
+    results["Run 2: no muP (tied)"] = r2
+    del model
 
-    # --- Step 5: muP restored, but embedding rescaled ---
-    print("\n\n### RUN 3: muP + embedding rescaled by 1/scale_emb ###")
-    model_rescaled = build_model(BASE_CONFIG)
-    model_rescaled.transformer.wte.weight.data *= (1.0 / model_rescaled.config.scale_emb)
-    loss_rescaled = forward_trace(model_rescaled, INPUT_IDS, "muP + wte *= 1/scale_emb")
-    del model_rescaled
+    # ===================================================================
+    # RUN 3: muP + wte *= 1/scale_emb
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 3: muP + wte.weight *= 1/scale_emb after init")
+    print("#" * 80)
+    model = build_model(BASE_CONFIG, seed=0)
+    model.transformer.wte.weight.data *= (1.0 / model.config.scale_emb)
+    r3 = custom_forward(model, INPUT_IDS, verbose=False)
+    results["Run 3: muP + wte/=scale_emb"] = r3
+    del model
 
-    # --- Step 6: Residual scale check ---
+    # ===================================================================
+    # RUN 4: Tied, extra 1/scale_emb in pre-logit (forward-only change)
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 4: Tied, logits = F.linear(x / scale_width / scale_emb, wte.weight)")
+    print("#" * 80)
+    model = build_model(BASE_CONFIG, seed=0)
+    scale_width = model.config.n_embd / model.config.dim_model_base
+    r4 = custom_forward(model, INPUT_IDS,
+                        pre_logit_divisor=scale_width * model.config.scale_emb,
+                        verbose=False)
+    results["Run 4: tied, /scale_width/scale_emb"] = r4
+    del model
+
+    # ===================================================================
+    # RUN 5: Tied, wte init std=1/sqrt(hidden), forward uses sqrt(hidden)
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 5: Tied, wte std=1/sqrt(768), emb_multiplier=sqrt(768)")
+    print("#" * 80)
+    model = build_model(BASE_CONFIG, seed=0)
+    # Rescale wte to std=1/sqrt(768): divide by sqrt(768)
+    # (init was std=1.0, we want std=1/sqrt(768))
+    hidden = model.config.n_embd
+    model.transformer.wte.weight.data /= (hidden ** 0.5)
+    wte_std_after = model.transformer.wte.weight.float().std().item()
+    print(f"  wte.weight std after rescale: {wte_std_after:.6f} (target: {1/(hidden**0.5):.6f})")
+    # Forward: emb_multiplier=sqrt(768) instead of scale_emb=8
+    # This means wte(x) has per-element std=1/sqrt(768), multiplied by sqrt(768) → std≈1
+    # Logits: F.linear(x/scale_width, wte.weight) where wte has std=1/sqrt(768)
+    # logit_std ≈ sqrt(768) * (1/scale_width) * (1/sqrt(768)) = 1/scale_width ≈ 0.33
+    r5 = custom_forward(model, INPUT_IDS,
+                        emb_multiplier=hidden ** 0.5,
+                        verbose=False)
+    results["Run 5: wte std=1/sqrt(d), emb*=sqrt(d)"] = r5
+    del model
+
+    # ===================================================================
+    # RUN 6: Tied, output_scale sweep
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 6: Tied, logits *= output_scale  (sweep)")
+    print("#" * 80)
+    for output_scale in [1.0, 0.3, 0.1, 0.03]:
+        model = build_model(BASE_CONFIG, seed=0)
+        r = custom_forward(model, INPUT_IDS, output_scale=output_scale, verbose=False)
+        label = f"Run 6: output_scale={output_scale}"
+        results[label] = r
+        del model
+
+    # ===================================================================
+    # RUN 7: Untied baseline (sanity check)
+    # ===================================================================
+    print("\n\n" + "#" * 80)
+    print("### RUN 7: Untied baseline (tie_word_embeddings=False)")
+    print("#" * 80)
+    untied_config = {**BASE_CONFIG, "tie_word_embeddings": False}
+    model = build_model(untied_config, seed=0)
+    param_stat("lm_head.weight", model.lm_head.weight)
+    r7 = custom_forward(model, INPUT_IDS, verbose=False)
+    results["Run 7: UNTIED baseline"] = r7
+    del model
+
+    # ===================================================================
+    # Residual scale + init check
+    # ===================================================================
     check_residual_scale()
-
-    # --- Step 7: Init inspection ---
     inspect_init()
 
-    # --- Summary ---
+    # ===================================================================
+    # SUMMARY TABLE
+    # ===================================================================
     print(f"\n{'='*80}")
-    print(f"SUMMARY")
+    print(f"SUMMARY TABLE")
     print(f"{'='*80}")
-    expected = math.log(65536)
-    print(f"  Expected initial loss ln(65536) = {expected:.4f}")
-    print(f"  Healthy range: [{expected:.2f}, {2*expected:.2f}]")
-    print(f"")
-    print(f"  Run 1 (full muP):              loss = {loss_mup:.4f}  {'OK' if expected <= loss_mup <= 2*expected else 'BAD'}")
-    print(f"  Run 2 (no muP):                loss = {loss_nomup:.4f}  {'OK' if expected <= loss_nomup <= 2*expected else 'BAD'}")
-    print(f"  Run 3 (muP + emb rescale):     loss = {loss_rescaled:.4f}  {'OK' if expected <= loss_rescaled <= 2*expected else 'BAD'}")
+    print(f"  Expected loss: {EXPECTED_LOSS:.4f}")
+    print(f"  Healthy range: [{EXPECTED_LOSS:.2f}, {2*EXPECTED_LOSS:.2f}]")
+    print()
+    header = f"  {'Run':<45s}  {'wte_std':>10s}  {'pre_logit':>10s}  {'logit_std':>10s}  {'absmax':>10s}  {'loss':>10s}  {'ratio':>6s}  {'|Δ|':>8s}"
+    print(header)
+    print("  " + "-" * (len(header) - 2))
 
-    print(f"\nDiagnostic complete. Output also saved to /tmp/diag_forward.log if you piped it.")
+    # Sort by distance from expected loss
+    ranked = sorted(results.items(), key=lambda kv: abs(kv[1]['loss'] - EXPECTED_LOSS))
+
+    for name, r in ranked:
+        delta = abs(r['loss'] - EXPECTED_LOSS)
+        in_range = EXPECTED_LOSS <= r['loss'] <= 2 * EXPECTED_LOSS
+        marker = " <-- OK" if in_range else ""
+        loss_str = f"{r['loss']:.4f}" if not math.isnan(r['loss']) else "NaN"
+        print(f"  {name:<45s}  {r['wte_std']:10.6f}  {r['pre_logit_std']:10.6f}"
+              f"  {r['logits_std']:10.4f}  {r['logits_absmax']:10.4f}"
+              f"  {loss_str:>10s}  {r['ratio']:5.2f}x  {delta:8.4f}{marker}")
+
+    print(f"\nDone. Pipe to /tmp/diag_forward_v2.log for the record.")
