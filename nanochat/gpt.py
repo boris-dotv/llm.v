@@ -1,14 +1,15 @@
 """
-GPT model (rewrite, a lot simpler)
+GPT model — MiniCPM-SALA aligned architecture.
 Notable features:
-- rotary embeddings (and no positional embeddings)
-- QK norm
-- untied weights for token embedding and lm_head
-- relu^2 activation in MLP
-- norm after token embedding
-- no learnable params in rmsnorm
-- no bias in linear layers
-- Group-Query Attention (GQA) support for more efficient inference
+- Rotary embeddings (RoPE)
+- QK norm (parameter-free on softmax heads, learnable on lightning heads)
+- SwiGLU MLP (gate_proj, up_proj, down_proj)
+- Learnable RMSNorm (input_layernorm, post_attention_layernorm, final ln_f)
+- MiniCPM scaling: scale_emb on embedding, scale_depth residual scaling, scale_width on logits
+- Tied or untied word embeddings (tie_word_embeddings flag)
+- Hybrid mixer_types: minicpm4 (softmax), lightning (SimpleGLA), sparse (InfLLM-V2)
+- GQA support, output gates, HyPE
+- No bias in linear layers
 - Flash Attention 3 integration
 """
 
@@ -34,14 +35,15 @@ class GPTConfig:
     n_head: int = 6 # number of query heads
     n_kv_head: int = 6 # number of key/value heads (GQA)
     n_embd: int = 768
-    # Sliding window attention pattern string, tiled across layers. Final layer always L.
-    # Characters: L=long (full context), S=short (half context)
-    # Examples: "L"=all full context, "SL"=alternating, "SSL"=two short then one long
-    window_pattern: str = "SSSL"
+    intermediate_size: int = -1  # MLP intermediate size. -1 = use 4*n_embd (legacy default).
+    scale_depth: float = 1.4  # Residual scaling: sublayer_output * (scale_depth / sqrt(n_layer))
+    rms_norm_eps: float = 1e-6  # Epsilon for RMSNorm
+    scale_emb: float = 8.0  # Multiply embedding output by this factor
+    dim_model_base: int = 256  # Base model dim for logit width scaling
+    tie_word_embeddings: bool = False  # Share embed_tokens and lm_head weights
     # --- SALA hybrid attention fields ---
-    # Per-layer attention type: "dense" (softmax, optionally sparse via InfLLM-V2) or "linear"
-    # (SimpleGLA). None = all dense (backward compat with existing checkpoints).
-    attn_types: list = None
+    # Per-layer mixer type: "minicpm4" (dense softmax), "lightning" (SimpleGLA), "sparse" (InfLLM-V2)
+    mixer_types: list = None  # None = all minicpm4
     # KV heads for dense/sparse layers. -1 = use n_kv_head. Set to e.g. 2 for GQA on sparse layers.
     n_kv_head_sparse: int = -1
     # Add sigmoid output gate after attention (o_gate on sparse layers, z_proj on linear layers)
@@ -66,10 +68,6 @@ def norm(x):
     # Purely functional rmsnorm with no learnable params
     return F.rms_norm(x, (x.size(-1),))
 
-
-def has_ve(layer_idx, n_layer):
-    """Returns True if GPT layer should have Value Embedding (alternating, last layer always included)."""
-    return layer_idx % 2 == (n_layer - 1) % 2
 
 def apply_rotary_emb(x, cos, sin):
     assert x.ndim == 4  # multihead attention
@@ -97,14 +95,12 @@ class CausalSelfAttention(nn.Module):
         self.c_k = nn.Linear(self.n_embd, self.n_kv_head * self.head_dim, bias=False)
         self.c_v = nn.Linear(self.n_embd, self.n_kv_head * self.head_dim, bias=False)
         self.c_proj = nn.Linear(self.n_embd, self.n_embd, bias=False)
-        self.ve_gate_channels = 32
-        self.ve_gate = nn.Linear(self.ve_gate_channels, self.n_kv_head, bias=False) if has_ve(layer_idx, config.n_layer) else None
         # Output gate (SALA: o_gate on sparse layers)
         self.o_gate = nn.Linear(self.n_embd, self.n_head * self.head_dim, bias=False) if config.use_output_gate else None
         # HyPE: sparse layers do NOT use RoPE (NoPE for long-range recall)
         self.use_rope = not (config.use_hype and is_sparse_layer)
 
-    def forward(self, x, ve, cos_sin, window_size, kv_cache):
+    def forward(self, x, cos_sin, window_size, kv_cache):
         B, T, C = x.size()
 
         # Project the input to get queries, keys, and values
@@ -112,12 +108,6 @@ class CausalSelfAttention(nn.Module):
         q = self.c_q(x).view(B, T, self.n_head, self.head_dim)
         k = self.c_k(x).view(B, T, self.n_kv_head, self.head_dim)
         v = self.c_v(x).view(B, T, self.n_kv_head, self.head_dim)
-
-        # Value residual (ResFormer): mix in value embedding with input-dependent gate per head
-        if ve is not None:
-            ve = ve.view(B, T, self.n_kv_head, self.head_dim)
-            gate = 2 * torch.sigmoid(self.ve_gate(x[..., :self.ve_gate_channels]))  # (B, T, n_kv_head), range (0, 2)
-            v = v + gate.unsqueeze(-1) * ve
 
         # Apply Rotary Embeddings (conditionally — HyPE: sparse layers skip RoPE)
         if self.use_rope:
@@ -155,31 +145,33 @@ class CausalSelfAttention(nn.Module):
 class MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.c_fc = nn.Linear(config.n_embd, 4 * config.n_embd, bias=False)
-        self.c_proj = nn.Linear(4 * config.n_embd, config.n_embd, bias=False)
+        intermediate = config.intermediate_size if config.intermediate_size > 0 else 4 * config.n_embd
+        self.gate_proj = nn.Linear(config.n_embd, intermediate, bias=False)
+        self.up_proj = nn.Linear(config.n_embd, intermediate, bias=False)
+        self.down_proj = nn.Linear(intermediate, config.n_embd, bias=False)
 
     def forward(self, x):
-        x = self.c_fc(x)
-        x = F.relu(x).square()
-        x = self.c_proj(x)
-        return x
+        return self.down_proj(F.silu(self.gate_proj(x)) * self.up_proj(x))
 
 
 class Block(nn.Module):
-    def __init__(self, config, layer_idx, attn_type="dense"):
+    def __init__(self, config, layer_idx, mixer_type="minicpm4"):
         super().__init__()
-        if attn_type == "linear":
+        self.residual_scale = config.scale_depth / (config.n_layer ** 0.5)
+        self.input_layernorm = nn.RMSNorm(config.n_embd, eps=config.rms_norm_eps)
+        self.post_attention_layernorm = nn.RMSNorm(config.n_embd, eps=config.rms_norm_eps)
+        if mixer_type == "lightning":
             from nanochat.linear_attention import LightningAttention
             self.attn = LightningAttention(config, layer_idx)
         else:
-            # "dense" — used for both standard dense and InfLLM-V2 sparse attention
-            is_sparse = attn_type == "dense" and config.attn_types is not None
+            # "minicpm4" or "sparse" — both use softmax attention
+            is_sparse = mixer_type == "sparse"
             self.attn = CausalSelfAttention(config, layer_idx, is_sparse_layer=is_sparse)
         self.mlp = MLP(config)
 
-    def forward(self, x, ve, cos_sin, window_size, kv_cache):
-        x = x + self.attn(norm(x), ve, cos_sin, window_size, kv_cache)
-        x = x + self.mlp(norm(x))
+    def forward(self, x, cos_sin, window_size, kv_cache):
+        x = x + self.attn(self.input_layernorm(x), cos_sin, window_size, kv_cache) * self.residual_scale
+        x = x + self.mlp(self.post_attention_layernorm(x)) * self.residual_scale
         return x
 
 
@@ -192,53 +184,27 @@ class GPT(nn.Module):
         """
         super().__init__()
         self.config = config
-        # Resolve per-layer attention types (None = all dense for backward compat)
-        self.attn_types = config.attn_types or ["dense"] * config.n_layer
-        assert len(self.attn_types) == config.n_layer, f"attn_types length {len(self.attn_types)} != n_layer {config.n_layer}"
-        # Compute per-layer window sizes for sliding window attention
-        # window_size is (left, right) tuple: (-1, 0) for full context, (N, 0) for sliding window
-        self.window_sizes = self._compute_window_sizes(config)
-        # For linear layers, window_size is ignored — set to (-1, 0) to avoid confusion
-        for i in range(config.n_layer):
-            if self.attn_types[i] == "linear":
-                self.window_sizes[i] = (-1, 0)
+        # Resolve per-layer mixer types (None = all minicpm4)
+        self.mixer_types = config.mixer_types or ["minicpm4"] * config.n_layer
+        assert len(self.mixer_types) == config.n_layer, f"mixer_types length {len(self.mixer_types)} != n_layer {config.n_layer}"
         # Flag to disable InfLLM-V2 sparse dispatch (sparse layers fall back to dense FlashAttention).
-        # Linear layers are NOT affected — they always use SimpleGLA.
+        # Lightning layers are NOT affected — they always use SimpleGLA.
         self.disable_sparse = False
         # Pad vocab for efficiency (DDP, tensor cores). This is just an optimization - outputs are cropped in forward().
-        # https://huggingface.co/docs/transformers/main_classes/model#transformers.PreTrainedModel.resize_token_embeddings
         padded_vocab_size = ((config.vocab_size + pad_vocab_size_to - 1) // pad_vocab_size_to) * pad_vocab_size_to
         if padded_vocab_size != config.vocab_size:
             print0(f"Padding vocab_size from {config.vocab_size} to {padded_vocab_size} for efficiency")
-        # Construct blocks with per-layer attention type
+        # Construct blocks with per-layer mixer type
         blocks = []
         for layer_idx in range(config.n_layer):
-            attn_type = self.attn_types[layer_idx]
-            blocks.append(Block(config, layer_idx, attn_type=attn_type))
+            mixer_type = self.mixer_types[layer_idx]
+            blocks.append(Block(config, layer_idx, mixer_type=mixer_type))
         self.transformer = nn.ModuleDict({
             "wte": nn.Embedding(padded_vocab_size, config.n_embd),
             "h": nn.ModuleList(blocks),
+            "ln_f": nn.RMSNorm(config.n_embd, eps=config.rms_norm_eps),
         })
-        self.lm_head = nn.Linear(config.n_embd, padded_vocab_size, bias=False)
-        # Per-layer learnable scalars (inspired by modded-nanogpt)
-        # resid_lambdas: scales the residual stream at each layer (init 1.0 = neutral)
-        # x0_lambdas: blends initial embedding back in at each layer (init 0.0 = disabled)
-        # Separate parameters so they can have different optimizer treatment
-        self.resid_lambdas = nn.Parameter(torch.ones(config.n_layer))   # fake init, real init in init_weights()
-        self.x0_lambdas = nn.Parameter(torch.zeros(config.n_layer))     # fake init, real init in init_weights()
-        # Value embeddings (ResFormer-style): alternating layers, last layer always included
-        # For linear layers (full MHA), kv_dim = n_head * head_dim = n_embd
-        # For dense/sparse layers, kv_dim = n_kv_head * head_dim (may be smaller with GQA)
-        head_dim = config.n_embd // config.n_head
-        ve_dims = {}
-        for i in range(config.n_layer):
-            if has_ve(i, config.n_layer):
-                if self.attn_types[i] == "linear":
-                    ve_dims[str(i)] = config.n_head * head_dim  # full MHA
-                else:
-                    kv_heads = config.n_kv_head_sparse if config.n_kv_head_sparse > 0 else config.n_kv_head
-                    ve_dims[str(i)] = kv_heads * head_dim
-        self.value_embeds = nn.ModuleDict({k: nn.Embedding(padded_vocab_size, dim) for k, dim in ve_dims.items()})
+        self.lm_head = None if config.tie_word_embeddings else nn.Linear(config.n_embd, padded_vocab_size, bias=False)
         # To support meta device initialization, we init the rotary embeddings here, but it's just "fake" meta tensors only.
         # As for rotary_seq_len, these rotary embeddings are pretty small/cheap in memory,
         # so let's just over-compute them by 10X, but assert fail if we ever reach that amount.
@@ -271,14 +237,16 @@ class GPT(nn.Module):
             attn.z_proj:     zeros (if present)
             attn.q_norm/k_norm/o_norm: ones (standard RMSNorm init, handled by nn.RMSNorm default)
           MLP:
-            mlp.c_fc:        uniform, std=1/sqrt(n_embd)
-            mlp.c_proj:      zeros
+            mlp.gate_proj:   uniform, std=1/sqrt(n_embd)
+            mlp.up_proj:     uniform, std=1/sqrt(n_embd)
+            mlp.down_proj:   zeros
         """
         from nanochat.linear_attention import LightningAttention
 
         # Embedding and unembedding
         torch.nn.init.normal_(self.transformer.wte.weight, mean=0.0, std=1.0)
-        torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=0.001)
+        if self.lm_head is not None:
+            torch.nn.init.normal_(self.lm_head.weight, mean=0.0, std=0.001)
 
         # Transformer blocks: uniform init with bound = sqrt(3) * std (same standard deviation as normal)
         n_embd = self.config.n_embd
@@ -294,22 +262,10 @@ class GPT(nn.Module):
                 torch.nn.init.zeros_(attn.o_gate.weight)
             if hasattr(attn, 'z_proj') and attn.z_proj is not None:
                 torch.nn.init.zeros_(attn.z_proj.weight)
-            # MLP
-            torch.nn.init.uniform_(block.mlp.c_fc.weight, -s, s)
-            torch.nn.init.zeros_(block.mlp.c_proj.weight)
-
-        # Per-layer scalars
-        self.resid_lambdas.fill_(1.0)   # 1.0 => typical residual connections at init
-        self.x0_lambdas.fill_(0.0)      # 0.0 => skip connection to input is disabled at init
-
-        # Value embeddings (init like c_v: uniform with same std)
-        for ve in self.value_embeds.values():
-            torch.nn.init.uniform_(ve.weight, -s, s)
-
-        # Gate weights init to zero so gates start at sigmoid(0) = 0.5, scaled by 2 -> 1.0 (neutral)
-        for block in self.transformer.h:
-            if block.attn.ve_gate is not None:
-                torch.nn.init.zeros_(block.attn.ve_gate.weight)
+            # MLP (SwiGLU)
+            torch.nn.init.uniform_(block.mlp.gate_proj.weight, -s, s)
+            torch.nn.init.uniform_(block.mlp.up_proj.weight, -s, s)
+            torch.nn.init.zeros_(block.mlp.down_proj.weight)
 
         # Rotary embeddings
         head_dim = self.config.n_embd // self.config.n_head
@@ -327,8 +283,6 @@ class GPT(nn.Module):
         # Cast embeddings to bf16: optimizer can tolerate it and it saves memory
         if self.transformer.wte.weight.device.type == "cuda":
             self.transformer.wte.to(dtype=torch.bfloat16)
-            for ve in self.value_embeds.values():
-                ve.to(dtype=torch.bfloat16)
 
     def _precompute_rotary_embeddings(self, seq_len, head_dim, base=None, device=None):
         if base is None:
@@ -348,35 +302,6 @@ class GPT(nn.Module):
         cos, sin = cos[None, :, None, :], sin[None, :, None, :] # add batch and head dims for later broadcasting
         return cos, sin
 
-    def _compute_window_sizes(self, config):
-        """
-        Compute per-layer window sizes for sliding window attention.
-
-        Returns list of (left, right) tuples for FA3's window_size parameter:
-        - left: how many tokens before current position to attend to (-1 = unlimited)
-        - right: how many tokens after current position to attend to (0 for causal)
-
-        Pattern string is tiled across layers. Final layer always gets L (full context).
-        Characters: L=long (full context), S=short (half context)
-        """
-        pattern = config.window_pattern.upper()
-        assert all(c in "SL" for c in pattern), f"Invalid window_pattern: {pattern}. Use only S and L."
-        # Map characters to window sizes
-        long_window = config.sequence_len
-        short_window = long_window // 2
-        char_to_window = {
-            "L": (long_window, 0),
-            "S": (short_window, 0),
-        }
-        # Tile pattern across layers
-        window_sizes = []
-        for layer_idx in range(config.n_layer):
-            char = pattern[layer_idx % len(pattern)]
-            window_sizes.append(char_to_window[char])
-        # Final layer always gets full context
-        window_sizes[-1] = (long_window, 0)
-        return window_sizes
-
     def get_device(self):
         return self.transformer.wte.weight.device
 
@@ -391,21 +316,18 @@ class GPT(nn.Module):
         Ref: https://arxiv.org/abs/2204.02311 (PaLM paper).
         """
         nparams = sum(p.numel() for p in self.parameters())
-        # Exclude non-matmul params: embeddings and per-layer scalars
-        value_embeds_numel = sum(ve.weight.numel() for ve in self.value_embeds.values())
-        nparams_exclude = (self.transformer.wte.weight.numel() + value_embeds_numel +
-                          self.resid_lambdas.numel() + self.x0_lambdas.numel())
+        # Exclude non-matmul params: embeddings
+        nparams_exclude = self.transformer.wte.weight.numel()
         h, q, t = self.config.n_head, self.config.n_embd // self.config.n_head, self.config.sequence_len
-        # Sum attention FLOPs per layer, accounting for layer type and sliding window
+        # Sum attention FLOPs per layer, accounting for layer type
         attn_flops = 0
-        for i, window_size in enumerate(self.window_sizes):
-            if self.attn_types[i] == "linear":
+        for i in range(self.config.n_layer):
+            if self.mixer_types[i] == "lightning":
                 # Linear attention: state update is O(T * n_head * head_dim^2), no quadratic attention
                 attn_flops += 6 * t * h * q * q  # 6x for fwd+bwd of the state matmul
             else:
-                window = window_size[0]  # (left, right) tuple, we use left
-                effective_seq = t if window < 0 else min(window, t)
-                attn_flops += 12 * h * q * effective_seq
+                # minicpm4 or sparse: full context softmax attention
+                attn_flops += 12 * h * q * t
         num_flops_per_token = 6 * (nparams - nparams_exclude) + attn_flops
         return num_flops_per_token
 
@@ -433,27 +355,25 @@ class GPT(nn.Module):
                 matrix_params.append(p)
             else:
                 attn_scalar_params.append(p)
-        value_embeds_params = list(self.value_embeds.parameters())
         embedding_params = list(self.transformer.wte.parameters())
-        lm_head_params = list(self.lm_head.parameters())
-        resid_params = [self.resid_lambdas]
-        x0_params = [self.x0_lambdas]
-        all_params = len(matrix_params) + len(attn_scalar_params) + len(embedding_params) + len(lm_head_params) + len(value_embeds_params) + len(resid_params) + len(x0_params)
+        ln_f_params = list(self.transformer.ln_f.parameters())
+        lm_head_params = list(self.lm_head.parameters()) if self.lm_head is not None else []
+        all_params = len(matrix_params) + len(attn_scalar_params) + len(embedding_params) + len(ln_f_params) + len(lm_head_params)
         assert len(list(self.parameters())) == all_params, f"Parameter count mismatch: {len(list(self.parameters()))} != {all_params}"
-        # Create the AdamW optimizer for the embedding, lm_head, per-layer scalars, and 1D attention params
+        # Create the AdamW optimizer for the embedding, lm_head, and 1D attention params
         # Scale the LR for the AdamW parameters by ∝1/√dmodel (having tuned the LRs for 768 dim model)
         dmodel_lr_scale = (model_dim / 768) ** -0.5
         print0(f"Scaling the LR for the AdamW parameters ∝1/√({model_dim}/768) = {dmodel_lr_scale:.6f}")
         adam_groups = [
-            dict(params=lm_head_params, lr=unembedding_lr * dmodel_lr_scale),
             dict(params=embedding_params, lr=embedding_lr * dmodel_lr_scale),
-            dict(params=value_embeds_params, lr=embedding_lr * dmodel_lr_scale),  # same LR as token embedding
-            dict(params=resid_params, lr=scalar_lr * 0.01), # these are a lot more sensitive because they accumulate in the residual stream
-            dict(params=x0_params, lr=scalar_lr),
         ]
+        if lm_head_params:
+            adam_groups.insert(0, dict(params=lm_head_params, lr=unembedding_lr * dmodel_lr_scale))
         # Add 1D attention params (norms, gates) to AdamW if any exist (SALA linear layers have these)
-        if attn_scalar_params:
-            adam_groups.append(dict(params=attn_scalar_params, lr=scalar_lr))
+        # Also includes per-block input_layernorm + post_attention_layernorm weights
+        all_scalar_params = attn_scalar_params + ln_f_params
+        if all_scalar_params:
+            adam_groups.append(dict(params=all_scalar_params, lr=scalar_lr))
         adamw_kwargs = dict(betas=adam_betas, eps=1e-10, weight_decay=0.0) # NOTE: weight decay is hardcoded to 0.0 for AdamW, only used in Muon
         AdamWFactory = DistAdamW if ddp else partial(torch.optim.AdamW, fused=True)
         adamw_optimizer = AdamWFactory(adam_groups, **adamw_kwargs)
@@ -480,30 +400,32 @@ class GPT(nn.Module):
         cos_sin = self.cos[:, T0:T0+T], self.sin[:, T0:T0+T] # truncate cache to current sequence length
 
         # Forward the trunk of the Transformer
-        x = self.transformer.wte(idx)
-        x = norm(x)
-        x0 = x  # save initial normalized embedding for x0 residual
+        x = self.transformer.wte(idx) * self.config.scale_emb
+        # Full causal attention window: (-1, 0) means attend to all previous tokens
+        window_size = (-1, 0)
         for i, block in enumerate(self.transformer.h):
-            x = self.resid_lambdas[i] * x + self.x0_lambdas[i] * x0
-            ve = self.value_embeds[str(i)](idx) if str(i) in self.value_embeds else None
             if self.config.use_gradient_checkpointing and self.training:
                 x = torch.utils.checkpoint.checkpoint(
-                    block, x, ve, cos_sin, self.window_sizes[i], kv_cache,
+                    block, x, cos_sin, window_size, kv_cache,
                     use_reentrant=False,
                 )
             else:
-                x = block(x, ve, cos_sin, self.window_sizes[i], kv_cache)
+                x = block(x, cos_sin, window_size, kv_cache)
         # Advance KV cache position after all layers have processed (inference only)
         if kv_cache is not None:
             kv_cache.advance(T)
-        x = norm(x)
+        x = self.transformer.ln_f(x)
 
         # Forward the lm_head (compute logits)
-        softcap = 15 # smoothly cap the logits to the range [-softcap, softcap]
-        logits = self.lm_head(x) # (B, T, padded_vocab_size) <- very big tensor, large amount of memory
+        scale_width = self.config.n_embd / self.config.dim_model_base
+        if self.lm_head is not None:
+            logits = self.lm_head(x / scale_width)
+        else:
+            logits = F.linear(x / scale_width, self.transformer.wte.weight)
         logits = logits[..., :self.config.vocab_size] # slice to remove padding
-        logits = logits.float() # switch to fp32 for logit softcap and loss computation
-        logits = softcap * torch.tanh(logits / softcap) # squash the logits
+        logits = logits.float() # switch to fp32 for loss computation
+        # softcap = 15  # logit softcap removed — MiniCPM doesn't use it
+        # logits = softcap * torch.tanh(logits / softcap)
 
         if targets is not None:
             # training: given the targets, compute and return the loss

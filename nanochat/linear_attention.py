@@ -12,7 +12,7 @@ import math
 import torch
 import torch.nn as nn
 
-from nanochat.gpt import norm, has_ve, apply_rotary_emb
+from nanochat.gpt import norm, apply_rotary_emb
 
 # Lazy import fla kernels — may not be installed
 _fla_available = False
@@ -74,10 +74,6 @@ class LightningAttention(nn.Module):
         self.k_norm = nn.RMSNorm(self.head_dim)
         self.o_norm = nn.RMSNorm(self.n_embd)
 
-        # Value embedding gate (same interface as CausalSelfAttention)
-        self.ve_gate_channels = 32
-        self.ve_gate = nn.Linear(self.ve_gate_channels, self.n_head, bias=False) if has_ve(layer_idx, config.n_layer) else None
-
         # ALiBi-style decay slopes stored in log-space for fla
         # slopes in (0, 1), log(slopes) in (-inf, 0) — fla expects log-space g
         slopes = _build_slope_tensor(self.n_head)
@@ -87,19 +83,13 @@ class LightningAttention(nn.Module):
         # HyPE: linear layers always get RoPE
         self.use_rope = True
 
-    def forward(self, x, ve, cos_sin, window_size, kv_cache):
+    def forward(self, x, cos_sin, window_size, kv_cache):
         _ensure_fla()
         B, T, C = x.size()
 
         q = self.c_q(x).view(B, T, self.n_head, self.head_dim)
         k = self.c_k(x).view(B, T, self.n_head, self.head_dim)
         v = self.c_v(x).view(B, T, self.n_head, self.head_dim)
-
-        # Value residual (ResFormer) — identical logic to CausalSelfAttention
-        if ve is not None and self.ve_gate is not None:
-            ve = ve.view(B, T, self.n_head, self.head_dim)
-            gate = 2 * torch.sigmoid(self.ve_gate(x[..., :self.ve_gate_channels]))  # (B, T, n_head)
-            v = v + gate.unsqueeze(-1) * ve
 
         # RoPE (HyPE: linear layers get RoPE)
         if self.use_rope:
@@ -167,14 +157,3 @@ class LightningAttention(nn.Module):
         else:
             self.c_k.weight.data.copy_(dense_attn.c_k.weight.data)
             self.c_v.weight.data.copy_(dense_attn.c_v.weight.data)
-
-        # Copy ve_gate if both have it, expanding if needed
-        if self.ve_gate is not None and dense_attn.ve_gate is not None:
-            if dense_attn.ve_gate.weight.shape[0] != self.ve_gate.weight.shape[0]:
-                dense_kv_heads = dense_attn.ve_gate.weight.shape[0]
-                repeat_factor = self.n_head // dense_kv_heads
-                self.ve_gate.weight.data.copy_(
-                    dense_attn.ve_gate.weight.data.repeat(repeat_factor, 1)
-                )
-            else:
-                self.ve_gate.weight.data.copy_(dense_attn.ve_gate.weight.data)

@@ -140,27 +140,27 @@ class HybridKVCache(KVCache):
     Linear attention layers use a fixed-size recurrent state: (B, n_head, head_dim, head_dim).
     """
 
-    def __init__(self, batch_size, num_heads, seq_len, head_dim, num_layers, device, dtype, attn_types):
-        # Only allocate KV cache tensors for non-linear layers
-        n_sparse_layers = sum(1 for t in attn_types if t != "linear")
+    def __init__(self, batch_size, num_heads, seq_len, head_dim, num_layers, device, dtype, mixer_types):
+        # Only allocate KV cache tensors for non-lightning layers
+        n_sparse_layers = sum(1 for t in mixer_types if t != "lightning")
         super().__init__(batch_size, num_heads, seq_len, head_dim, n_sparse_layers, device, dtype)
         # Override n_layers to total layer count so advance() triggers correctly.
         # CausalSelfAttention.forward checks `layer_idx == kv_cache.n_layers - 1`
         # to decide when to call advance(). This must match the actual last layer index.
         self.n_layers = num_layers
-        self.attn_types = attn_types
+        self.mixer_types = mixer_types
         self.total_layers = num_layers
         # Map from global layer_idx to sparse-cache layer_idx
         self._sparse_layer_map = {}
         sparse_idx = 0
-        for i, t in enumerate(attn_types):
-            if t != "linear":
+        for i, t in enumerate(mixer_types):
+            if t != "lightning":
                 self._sparse_layer_map[i] = sparse_idx
                 sparse_idx += 1
-        # Recurrent states for linear layers: (B, n_head, head_dim, head_dim) per layer
+        # Recurrent states for lightning layers: (B, n_head, head_dim, head_dim) per layer
         self.linear_states = {}
-        for i, t in enumerate(attn_types):
-            if t == "linear":
+        for i, t in enumerate(mixer_types):
+            if t == "lightning":
                 self.linear_states[i] = torch.zeros(
                     batch_size, num_heads, head_dim, head_dim,
                     device=device, dtype=dtype

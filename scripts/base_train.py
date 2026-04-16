@@ -39,11 +39,20 @@ parser.add_argument("--run", type=str, default="dummy", help="wandb run name ('d
 # Runtime
 parser.add_argument("--device-type", type=str, default="", help="cuda|cpu|mps (empty = autodetect)")
 # Model architecture
-parser.add_argument("--depth", type=int, default=20, help="depth of the Transformer model")
-parser.add_argument("--aspect-ratio", type=int, default=64, help="model_dim = depth * aspect_ratio")
+parser.add_argument("--depth", type=int, default=20, help="depth of the Transformer model (legacy convenience)")
+parser.add_argument("--aspect-ratio", type=int, default=64, help="model_dim = depth * aspect_ratio (used with --depth)")
 parser.add_argument("--head-dim", type=int, default=128, help="target head dimension for attention")
 parser.add_argument("--max-seq-len", type=int, default=2048, help="max context length")
-parser.add_argument("--window-pattern", type=str, default="SSSL", help="sliding window pattern tiled across layers: L=full, S=half context (e.g. 'SSL')")
+# Explicit architecture overrides (take precedence over --depth)
+parser.add_argument("--hidden", type=int, default=-1, help="hidden dimension (overrides depth-derived value)")
+parser.add_argument("--layers", type=int, default=-1, help="number of layers (overrides --depth)")
+parser.add_argument("--num-heads", type=int, default=-1, help="number of query heads (overrides depth-derived value)")
+parser.add_argument("--num-kv-heads", type=int, default=-1, help="number of KV heads (overrides depth-derived value)")
+parser.add_argument("--intermediate-size", type=int, default=-1, help="MLP intermediate size (overrides 4*hidden default)")
+parser.add_argument("--scale-depth", type=float, default=1.4, help="residual scaling factor: sublayer * scale_depth/sqrt(n_layer)")
+parser.add_argument("--scale-emb", type=float, default=8.0, help="embedding output scaling factor")
+parser.add_argument("--dim-model-base", type=int, default=256, help="base model dim for logit width scaling")
+parser.add_argument("--tie-word-embeddings", action="store_true", help="share embed_tokens and lm_head weights")
 # Training horizon (only one used, in order of precedence)
 parser.add_argument("--num-iterations", type=int, default=-1, help="explicit number of optimization steps (-1 = disable)")
 parser.add_argument("--target-flops", type=float, default=-1.0, help="calculate num_iterations to reach target_flops (-1 = disable)")
@@ -55,7 +64,7 @@ parser.add_argument("--embedding-lr", type=float, default=0.3, help="learning ra
 parser.add_argument("--unembedding-lr", type=float, default=0.004, help="learning rate for unembedding parameters (Adam)")
 parser.add_argument("--weight-decay", type=float, default=0.2, help="cautious weight decay for the Muon optimizer (for weights)")
 parser.add_argument("--matrix-lr", type=float, default=0.02, help="learning rate for matrix parameters (Muon)")
-parser.add_argument("--scalar-lr", type=float, default=0.5, help="learning rate for scalars (resid_lambdas, x0_lambdas)")
+parser.add_argument("--scalar-lr", type=float, default=0.5, help="learning rate for 1D params (layernorms, attention gates)")
 parser.add_argument("--adam-beta1", type=float, default=0.8, help="Adam beta1 for embedding/unembedding")
 parser.add_argument("--adam-beta2", type=float, default=0.95, help="Adam beta2 for embedding/unembedding")
 parser.add_argument("--warmup-ratio", type=float, default=0.0, help="ratio of iterations for LR warmup")
@@ -107,9 +116,6 @@ else:
     print0("!" * 80)
     print0("WARNING: Flash Attention 3 not available, using PyTorch SDPA fallback")
     print0("WARNING: Training will be less efficient without FA3")
-    if args.window_pattern != "L":
-        print0(f"WARNING: SDPA has no support for sliding window attention (window_pattern='{args.window_pattern}'). Your GPU utilization will be terrible.")
-        print0("WARNING: Recommend using --window-pattern L for full context attention without alternating sliding window patterns.")
     print0("!" * 80)
 
 # Tokenizer will be useful for evaluation, also we need the vocab size
@@ -118,16 +124,24 @@ token_bytes = get_token_bytes(device=device)
 vocab_size = tokenizer.get_vocab_size()
 print0(f"Vocab size: {vocab_size:,}")
 
-# Model kwargs are derived from the desired depth of the model
-# We nudge model_dim up to the nearest multiple of head_dim to ensure clean division
-# (FA3 requires head_dim divisible by 8, and this guarantees head_dim == args.head_dim exactly)
-# (For very small depths, this gives a slight "unfair" advantage to models with odd depths)
-num_layers = args.depth
-base_dim = args.depth * args.aspect_ratio
-model_dim = ((base_dim + args.head_dim - 1) // args.head_dim) * args.head_dim
-num_heads = model_dim // args.head_dim
-num_kv_heads = num_heads # default is 1:1 GQA (Group Query Attention) ratio (i.e. GQA is disabled)
-head_dim = model_dim // num_heads
+# Model kwargs are derived from --depth OR explicit flags (explicit flags take precedence)
+if args.hidden > 0 or args.layers > 0 or args.num_heads > 0:
+    # Explicit architecture: use provided values, fill in defaults where not specified
+    num_layers = args.layers if args.layers > 0 else args.depth
+    model_dim = args.hidden if args.hidden > 0 else args.depth * args.aspect_ratio
+    # Nudge model_dim up to nearest multiple of head_dim for clean division
+    model_dim = ((model_dim + args.head_dim - 1) // args.head_dim) * args.head_dim
+    num_heads = args.num_heads if args.num_heads > 0 else model_dim // args.head_dim
+    num_kv_heads = args.num_kv_heads if args.num_kv_heads > 0 else num_heads
+    head_dim = model_dim // num_heads
+else:
+    # Legacy: derive from --depth and --aspect-ratio
+    num_layers = args.depth
+    base_dim = args.depth * args.aspect_ratio
+    model_dim = ((base_dim + args.head_dim - 1) // args.head_dim) * args.head_dim
+    num_heads = model_dim // args.head_dim
+    num_kv_heads = num_heads
+    head_dim = model_dim // num_heads
 print0(f"num_layers: {num_layers}")
 print0(f"model_dim: {model_dim} (base: {base_dim}, nudge: {model_dim - base_dim:+d})")
 print0(f"num_heads: {num_heads}")
@@ -156,15 +170,15 @@ if batch_ratio != 1.0:
     print0(f"Scaling LRs by {batch_lr_scale:.4f} for batch size {args.total_batch_size:,} (reference: {reference_batch_size:,})")
 
 # Weight decay is tuned at d12 and its scaling seems to be \propto 1/channels^2 (or equivalently, \propto 1/depth^2 due to constant aspect ratio)
-weight_decay_scaled = args.weight_decay * (12 / args.depth)**2
-if args.depth != 12:
-    print0(f"Scaling weight decay from {args.weight_decay:.6f} to {weight_decay_scaled:.6f} for depth {args.depth}")
+weight_decay_scaled = args.weight_decay * (12 / num_layers)**2
+if num_layers != 12:
+    print0(f"Scaling weight decay from {args.weight_decay:.6f} to {weight_decay_scaled:.6f} for {num_layers} layers")
 
 # -----------------------------------------------------------------------------
 # Initialize the Model
 
 # Create a new model with random weights
-model_config_kwargs = dict(sequence_len=args.max_seq_len, vocab_size=vocab_size, n_layer=num_layers, n_head=num_heads, n_kv_head=num_kv_heads, n_embd=model_dim, window_pattern=args.window_pattern)
+model_config_kwargs = dict(sequence_len=args.max_seq_len, vocab_size=vocab_size, n_layer=num_layers, n_head=num_heads, n_kv_head=num_kv_heads, n_embd=model_dim, intermediate_size=args.intermediate_size, scale_depth=args.scale_depth, scale_emb=args.scale_emb, dim_model_base=args.dim_model_base, tie_word_embeddings=args.tie_word_embeddings)
 with torch.device("meta"):
     # All tensors are created as meta tensors (they have shape/dtype but no data)
     model_config = GPTConfig(**model_config_kwargs)
@@ -182,7 +196,7 @@ if args.init_from and args.init_from_step >= 0:
     del model_data
 
 # If we are resuming, overwrite the model parameters with those of the checkpoint
-output_dirname = args.model_tag if args.model_tag else f"d{args.depth}" # e.g. d12
+output_dirname = args.model_tag if args.model_tag else f"d{num_layers}" # e.g. d12
 checkpoint_dir = os.path.join(base_dir, "base_checkpoints", output_dirname)
 resuming = args.resume_from_step != -1
 if resuming:

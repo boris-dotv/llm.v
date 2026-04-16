@@ -32,13 +32,29 @@ def log0(message):
 
 def _patch_missing_config_keys(model_config_kwargs):
     """Add default values for new config keys missing in old checkpoints."""
-    # Old models were trained with full context (no sliding window)
-    if "window_pattern" not in model_config_kwargs:
-        model_config_kwargs["window_pattern"] = "L"
-        log0(f"Patching missing window_pattern in model config to 'L'")
-    # SALA hybrid attention fields
-    if "attn_types" not in model_config_kwargs:
-        model_config_kwargs["attn_types"] = None
+    # MLP intermediate size
+    if "intermediate_size" not in model_config_kwargs:
+        model_config_kwargs["intermediate_size"] = -1
+    # scale_depth
+    if "scale_depth" not in model_config_kwargs:
+        model_config_kwargs["scale_depth"] = 1.4
+    # rms_norm_eps
+    if "rms_norm_eps" not in model_config_kwargs:
+        model_config_kwargs["rms_norm_eps"] = 1e-6
+    # scale_emb / dim_model_base
+    if "scale_emb" not in model_config_kwargs:
+        model_config_kwargs["scale_emb"] = 8.0
+    if "dim_model_base" not in model_config_kwargs:
+        model_config_kwargs["dim_model_base"] = 256
+    # tie_word_embeddings
+    if "tie_word_embeddings" not in model_config_kwargs:
+        model_config_kwargs["tie_word_embeddings"] = False
+    # mixer_types (replaces old attn_types)
+    if "mixer_types" not in model_config_kwargs:
+        model_config_kwargs["mixer_types"] = None
+    # Remove legacy fields
+    model_config_kwargs.pop("window_pattern", None)
+    model_config_kwargs.pop("attn_types", None)
     if "n_kv_head_sparse" not in model_config_kwargs:
         model_config_kwargs["n_kv_head_sparse"] = -1
     if "use_output_gate" not in model_config_kwargs:
@@ -61,15 +77,7 @@ def _patch_missing_config_keys(model_config_kwargs):
 
 def _patch_missing_keys(model_data, model_config):
     """Add default values for new parameters that may be missing in old checkpoints."""
-    n_layer = model_config.n_layer
-    # resid_lambdas defaults to 1.0 (identity scaling)
-    if "resid_lambdas" not in model_data:
-        model_data["resid_lambdas"] = torch.ones(n_layer)
-        log0(f"Patching missing resid_lambdas in model data to 1.0")
-    # x0_lambdas defaults to 0.0 (disabled)
-    if "x0_lambdas" not in model_data:
-        model_data["x0_lambdas"] = torch.zeros(n_layer)
-        log0(f"Patching missing x0_lambdas in model data to 0.0")
+    pass  # No patches needed currently
 
 def save_checkpoint(checkpoint_dir, step, model_data, optimizer_data, meta_data, rank=0):
     if rank == 0:
