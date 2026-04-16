@@ -1,0 +1,13 @@
+1. 先训练一个架构和 SALA hybrid 之前一模一样的 Dense 模型；
+    1. 要确认模型从 embedding 到 attention 再到 FFN 最后到 llm head 层的所有配置，是否和 dense non hybrid SALA 在 size 以外完全 align；
+    2. 要确认模型的具体尺寸是多少；
+    3. 确定训练的几个 stage，如何预训练，用什么数据预训练，什么时候引入 hybrid 什么时候引入 sparse；
+        1. S0 阶段 Dense Stable 用 FineWeb-Edu 进行训练，训练出 4k len 的模型；
+        2. S1 阶段 Dense Decay mid training，高质量 QA 进行训练；
+        3. S2 阶段 HALO Conversion 将 75% 换成 lightning-attn，与 S1 阶段数据同分布；
+        4. S3 阶段 Hybrid Continual Long Context Scaling， 启用 HyPE 和 sparse；
+        5. S4 阶段 Long Context mid training，高质量长文本；
+        6. S5 阶段 Evil Neuro 人格 8k 长度；
+        7. S6 阶段 Tool Use RL...
+    4. 如何进行 Vedal Neuro Sama 邪恶人格的 SFT 以及 Tool Use 的 RL；
+
